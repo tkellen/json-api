@@ -35,16 +35,36 @@
 
 <p><strong>This document is a work-in-progress and subject to revision. This document will clearly state when it is considered a final version and what that version number is.</strong></p>
 
-<h2>Top Level</h2>
-
-<p>The top-level of a JSON API document has the following keys:</p>
+<p>There are two JSON API styles:</p>
 
 <ul>
-<li>Resource names (<code>posts</code>, <code>comments</code>, <code>people</code>, etc.)</li>
-<li>A <code>meta</code> section</li>
-</ul><h2>Singular Resources</h2>
+<li>The ID Style</li>
+<li>The URL Style</li>
+</ul><p>The ID style is the easiest to get started with, but requires that your clients be able to guess the URLs for related documents. It also locks your API into a particular URL structure, which may become a problem as your API grows.</p>
 
-<p>If the value of a resource name is a JSON object, it represents a single document.</p>
+<p>The URL style requires less guessing on the client side, and makes clients more resilient to API changes, but is trickier to use with relationships and compound documents.</p>
+
+<p>In general, you should be able to start with an ID-based JSON API and upgrade to a URL-based API, if you want.</p>
+
+<h2>Document</h2>
+
+<p>In this specification, the term "document" refers to a single object with a set of attributes and relationships.</p>
+
+<p>A JSON response may include multiple documents, as described below.</p>
+
+<h2>ID-Based JSON API</h2>
+
+<h3>Top Level</h3>
+
+<p>The top-level of a JSON API document <strong>MAY</strong> have the following keys:</p>
+
+<ul>
+<li>
+<code>meta</code>: meta-information about a resource, such as pagination</li>
+<li>Other resource names (<code>posts</code>, <code>comments</code>, <code>people</code>, etc.) </li>
+</ul><h3>Singular Resources</h3>
+
+<p>If the value of a resource key is a JSON object, the value represents a single document.</p>
 
 <div class="highlight"><pre><span class="p">{</span>
   <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
@@ -53,9 +73,11 @@
 <span class="p">}</span>
 </pre></div>
 
-<h2>Resource Collections</h2>
+<p>The document <strong>MUST</strong> contain an <code>id</code> key. </p>
 
-<p>If the value of a resource name is a JSON array, it represents a list of documents.</p>
+<h3>Resource Collections</h3>
+
+<p>If the value of a resource key is a JSON array, the value represents a list of documents.</p>
 
 <div class="highlight"><pre><span class="p">{</span>
   <span class="s2">"posts"</span><span class="o">:</span> <span class="p">[{</span>
@@ -66,164 +88,403 @@
 <span class="p">}</span>
 </pre></div>
 
-<h2>JSON API Document</h2>
+<p>Each document in the list <strong>MUST</strong> contain an <code>id</code> key.</p>
 
-<p>A JSON API document is a list of key/value pairs that represent either attributes or relationships.</p>
+<h3>IDs</h3>
 
-<p>Attribute or relationship keys <strong>SHOULD</strong> be camelcased.</p>
+<p>The <code>"id"</code> key in a document represents a unique identifier for the document, scoped to the document's type. The type scope is implicit, and hardcoded into clients of the API.</p>
 
 <h3>Attributes</h3>
 
-<p>An attribute's value can be any JSON value:</p>
+<p>Other than the <code>"rels"</code> and <code>"id"</code> keys, every key in a document represents an attribute. An attribute's value may be any JSON value.</p>
 
 <div class="highlight"><pre><span class="p">{</span>
   <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
-    <span class="nx">title</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span><span class="p">,</span>
-    <span class="nx">commentCount</span><span class="o">:</span> <span class="mi">23</span>
-    <span class="nx">isDraft</span><span class="o">:</span> <span class="kc">false</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span>
   <span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
 
-<h3>To-Many Relationships (Using IDs)</h3>
+<h3>Relationships</h3>
 
-<p>To specify a to-many relationship that points to a list of IDs, include it under a <code>"rels"</code> key: </p>
+<p>The value of the <code>"rels"</code> key is a JSON object that represents related documents.</p>
 
 <div class="highlight"><pre><span class="p">{</span>
   <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
     <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
     <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span><span class="p">,</span>
     <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
-      <span class="s2">"comments"</span><span class="o">:</span> <span class="p">[</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">17</span> <span class="p">]</span>
+      <span class="s2">"author"</span><span class="o">:</span> <span class="mi">9</span><span class="p">,</span>
+      <span class="s2">"comments"</span><span class="o">:</span> <span class="p">[</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">20</span> <span class="p">]</span>
     <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
 
-<p>If a to-many relationship is specified as a list of IDs, it <strong>SHOULD</strong> be possible to fetch a collection of the related documents by making a simple <code>GET</code> request with a URL composed of:</p>
+<h4>To-Many Relationships</h4>
 
-<ul>
-<li>The URL of the current document</li>
-<li>The part of relationship name converted to underscore format</li>
-<li>A <code>?</code> followed by the list of IDs, comma-separated<br>
-</li>
-</ul><h3>To-Many Relationships (Using URLs)</h3>
-
-<p>To specify a to-many relationship that points to a URL, include it under a <code>"rels"</code> key:</p>
+<p>A to-many relationship is represented as a JSON array of IDs.</p>
 
 <div class="highlight"><pre><span class="p">{</span>
   <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
     <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
     <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span><span class="p">,</span>
     <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
-      <span class="s2">"comments"</span><span class="o">:</span> <span class="p">{</span> <span class="s2">"url"</span><span class="o">:</span> <span class="s2">"http://example.com/posts/1/comments"</span> <span class="p">}</span>
+      <span class="s2">"comments"</span><span class="o">:</span> <span class="p">[</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">20</span> <span class="p">]</span>
     <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
 
-<p>If a to-many relationship is specified as a URL, it <strong>MUST</strong> be possible to fetch a collection of the related documents by using a simple <code>GET</code> request to the specified URL.</p>
+<p>An API that provides a to-many relationship as an array of IDs <strong>MUST</strong> respond to a <code>GET</code> request with a list of the specified documents with a URL formed by joining:</p>
 
-<h3>To-Many Relationships (Using URL Templates)</h3>
+<ul>
+<li>A base URL that represents the type of the related resource (this must be hardcoded in the client)</li>
+<li><code>?ids=</code></li>
+<li>A comma-separated list of the specified IDs</li>
+</ul><p>In the above example, a <code>GET</code> request to <code>/comments?ids=5,12,17,20</code> returns a document containing the four specified comments.</p>
 
-<p>You may also specify a URL template for a relationship as both an array of IDs and a URL template (using <code>{ids}</code> as the parameter):</p>
+<h4>To-One Relationships</h4>
+
+<p>A to-one relationship is represented as a single string or number value.</p>
 
 <div class="highlight"><pre><span class="p">{</span>
   <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
     <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
     <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span><span class="p">,</span>
     <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
-      <span class="s2">"comments"</span><span class="o">:</span> <span class="p">{</span>
-        <span class="s2">"url"</span><span class="o">:</span> <span class="s2">"http://example.com/posts/1/comments/{ids}"</span><span class="p">,</span>
-        <span class="s2">"ids"</span><span class="o">:</span> <span class="p">[</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">12</span> <span class="p">]</span>
-      <span class="p">}</span>
+      <span class="s2">"author"</span><span class="o">:</span> <span class="mi">17</span>
     <span class="p">}</span>
   <span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
 
-<p>If a to-many relationship is specified both as a URL and an array of IDs, it <strong>MUST</strong> be possible to fetch a collection of the related documents by:</p>
+<p>An API that provides a to-one relationship as an ID <strong>MUST</strong> respond to a <code>GET</code> request with the specified document with a URL formed by joining:</p>
 
 <ul>
-<li>Expanding the URL template by substituting the array of IDs into the <code>{ids}</code> variable. This will result in it being replaced with the comma-separated list of IDs.</li>
-<li>Performing a simple <code>GET</code> on the expanded URL</li>
-</ul><h3>To-One Relationships (Using ID)</h3>
+<li>A base URL that represents the type of the related resource (this must be hardcoded in the client)</li>
+<li><code>/</code></li>
+<li>The specified ID</li>
+</ul><p>In the above example, a <code>GET</code> request to <code>/people/17</code> returns a document containing the specified author.</p>
 
-<p>To specify a to-one relationship that points to an ID, use a relationship name with an <code>ID</code> suffix whose value is a JSON String or Number.</p>
+<h3>Compound Documents</h3>
 
-<pre><code>{
-  "posts": {
-    "id": 1,
-    "title": "Rails is Omakase"
-    "rels": {
-      "author": 9,
-    }
-  }
-}
-</code></pre>
+<p>To save HTTP requests, it may be convenient to send related documents along with the requested documents.</p>
 
-<p>If a to-many relationship is specified as an ID, it <strong>SHOULD</strong> be possible to fetch the related documents by making a simple <code>GET</code> request with a URL composed of:</p>
+<div class="highlight"><pre><span class="p">{</span>
+  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span><span class="p">,</span>
+    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
+      <span class="s2">"author"</span><span class="o">:</span> <span class="mi">9</span>
+    <span class="p">}</span>
+  <span class="p">},</span>
+  <span class="s2">"people"</span><span class="o">:</span> <span class="p">[{</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">9</span><span class="p">,</span>
+    <span class="s2">"name"</span><span class="o">:</span> <span class="s2">"@d2h"</span>
+  <span class="p">}]</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>The related documents are provided as an additional top-level document or document list whose key is a name that represents the document type.</p>
+
+<p>The linkage between the key under <code>"rels"</code> and the top-level keys is hardcoded into the client.</p>
+
+<h2>URL-Based JSON API</h2>
+
+<p>In the above description of ID-based JSON, there were several places where information about the location of related resources needed to be hardcoded into the client.</p>
+
+<p>The goal of the URL-Based JSON API is to eliminate the need for those specific instances of hardcoded information.</p>
+
+<h3>Top Level</h3>
+
+<p>The top-level of a JSON API document <strong>MAY</strong> have the following keys:</p>
 
 <ul>
-<li>The URL of the current document</li>
-<li>A <code>/</code> followed by the part of relationship name before the <code>ID</code> suffix, converted to underscore format</li>
-<li>A <code>/</code> followed by the ID</li>
-</ul><h3>To-One Relationships (Using URL)</h3>
+<li>
+<code>meta</code>: meta-information about a resource, such as pagination</li>
+<li>
+<code>rels</code>: in compound resources, information about relationships that would otherwise need to be repeated</li>
+<li>Other resource names (<code>posts</code>, <code>comments</code>, <code>people</code>, etc.) </li>
+</ul><h3>Singular Resources</h3>
 
-<p>To specify a to-one relationship that points to a URL, use a relationship name with a <code>URL</code> suffix whose value is a URL.</p>
+<p>If the value of a resource key is a JSON object, the value represents a single document.</p>
 
-<pre><code>{
-  "posts": {
-    "id": 1,
-    "title": "Rails is Omakase",
-    "rels": {
-      "author": { "url": "http://example.com/posts/1/author" },
-    }
-  }
-}
-</code></pre>
+<div class="highlight"><pre><span class="p">{</span>
+  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
+    <span class="c1">// an individual post document</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
 
-<p>If a to-many relationship is specified as a URL, it <strong>MUST</strong> be possible to fetch the related document by using a simple <code>GET</code> request to the specified URL.</p>
+<p>The document <strong>MAY</strong> contain an <code>id</code> key. </p>
 
-<h3>A Resource With Multiple Documents</h3>
+<h3>Resource Collections</h3>
 
-<p>So far, all resources have contained a single document. You may want to combine multiple documents into a single resource to reduce HTTP queries.</p>
+<p>If the value of a resource key is a JSON array, the value represents a list of documents.</p>
 
-<pre><code>{
-  "rels": {
-    "posts.author": "http://example.com/people/{posts.id}",
-    "posts.comments": "http://example.com/{posts.id}/comments/{posts.comments.ids}"
-  },
-  "posts": [{
-    "id": 1,
-    "title": "Rails is Omakase",
-    "rels": {
-      "comments": [ 1, 2, 5, 17 ]
-      "author": 17
-    }
-  }, {
-    "id": 2,
-    "title": "The Parley Letter",
-    "rels": {
-      "comments": [ 3, 4, 6 ]
-      "author": 17
-    }
-  }],
-  "http://example.com/people/{id}": [{
-    "id": 17,
-    "twitterName": "@d2h"
-  }]
-}
-</code></pre>
+<div class="highlight"><pre><span class="p">{</span>
+  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">[{</span>
+    <span class="c1">// an individual post document</span>
+  <span class="p">},</span> <span class="p">{</span>
+    <span class="c1">// an individual post document</span>
+  <span class="p">}]</span>
+<span class="p">}</span>
+</pre></div>
 
-<p>In this case, each relationship specifies a type to link it with </p>
+<p>Each document in the list <strong>MAY</strong> contain an <code>id</code> key.</p>
 
-<h3>Meta Sections</h3>
+<h3>IDs</h3>
+
+<p>The <code>"id"</code> key in a document represents a unique identifier for the document, scoped to the document's type. It can be used with URL templates to fetch related records, as described below.</p>
+
+<h3>Attributes</h3>
+
+<p>Other than the <code>"rels"</code> and <code>"id"</code> keys, every key in a document represents an attribute. An attribute's value may be any JSON value.</p>
+
+<div class="highlight"><pre><span class="p">{</span>
+  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<h3>Relationships</h3>
+
+<p>The value of the <code>"rels"</code> key is a JSON object that represents related documents.</p>
+
+<div class="highlight"><pre><span class="p">{</span>
+  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span><span class="p">,</span>
+    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
+      <span class="s2">"author"</span><span class="o">:</span> <span class="s2">"http://example.com/people/1"</span><span class="p">,</span>
+      <span class="s2">"comments"</span><span class="o">:</span> <span class="s2">"http://example.com/comments/5,12,17,20"</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<h4>To-Many Relationships</h4>
+
+<p>A to-many relationship is a string value that represents a URL.</p>
+
+<div class="highlight"><pre><span class="p">{</span>
+  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span><span class="p">,</span>
+    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
+      <span class="s2">"comments"</span><span class="o">:</span> <span class="s2">"http://example.com/posts/1/comments"</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>An API that provides a to-many relationship as a URL <strong>MUST</strong> respond to a <code>GET</code> request with a list of the specified documents with the specified URL.</p>
+
+<p>In the above example, a <code>GET</code> request to <code>/posts/1/comments</code> returns a document containing the four specified comments.</p>
+
+<h4>To-One Relationships</h4>
+
+<p>A to-one relationship is represented as a string value that represents a URL.</p>
+
+<div class="highlight"><pre><span class="p">{</span>
+  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span><span class="p">,</span>
+    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
+      <span class="s2">"author"</span><span class="o">:</span> <span class="s2">"http://example.com/people/17"</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>An API that provides a to-one relationship as an ID <strong>MUST</strong> respond to a <code>GET</code> request with the specified document with the specified URL.</p>
+
+<p>In the above example, a <code>GET</code> request to <code>/people/17</code> returns a document containing the specified author.</p>
+
+<h3>URL Template Shorthands</h3>
+
+<p>When returning a list of documents from a response, a top-level <code>"rels"</code> object can specify a URL template that should be used for all documents.</p>
+
+<p>Example:</p>
+
+<div class="highlight"><pre><span class="p">{</span>
+  <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s2">"posts.comments"</span><span class="o">:</span> <span class="s2">"http://example.com/posts/{post.id}/comments"</span>
+  <span class="p">},</span>
+  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">[{</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span>
+  <span class="p">},</span> <span class="p">{</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"The Parley Letter"</span>
+  <span class="p">}]</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>In this example, fetching <code>/posts/1/comments</code> will fetch the comments for <code>"Rails is Omakase"</code> and fetching <code>/posts/2/comments</code> will fetch the comments for <code>"The Parley Letter"</code>.</p>
+
+<div class="highlight"><pre><span class="p">{</span>
+  <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s2">"posts.comments"</span><span class="o">:</span> <span class="s2">"http://example.com/comments/{posts.comments}"</span>
+  <span class="p">},</span>
+  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span><span class="p">,</span>
+    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
+      <span class="s2">"comments"</span><span class="o">:</span> <span class="p">[</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span> <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>In this example, the <code>posts.comments</code> variable is expanded by "exploding" the array specified in the <code>"rels"</code> section of each post. The <a href="https://tools.ietf.org/html/rfc6570">URL template specification</a> specifies that the default explosion is to join the array members by a comma, so in this example, fetching <code>/comments/1,2,3,4</code> will return a list of all comments.</p>
+
+<p>This example shows how you can start with a list of IDs and then upgrade to specifying a different URL pattern than the default.</p>
+
+<p>The top-level <code>"rels"</code> key has the following behavior:</p>
+
+<ul>
+<li>Each key is a dot-separated path that points at a repeated relationship. For example <code>"posts.comments"</code> points at the <code>"comments"</code> relationship in each repeated document under <code>"posts"</code>.</li>
+<li>The value of each key is interpreted as a URL template.</li>
+<li>For each document that the path points to, act as if it specified a relationship formed by expanding the URL template with the non-URL value actually specified.</li>
+</ul><p>Here is another example that uses a has-one relationship:</p>
+
+<div class="highlight"><pre><span class="p">{</span>
+  <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s2">"posts.author"</span><span class="o">:</span> <span class="s2">"http://example.com/people/{posts.author}"</span>
+  <span class="p">},</span>
+  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">[{</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span><span class="p">,</span>
+    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
+      <span class="s2">"author"</span><span class="o">:</span> <span class="mi">12</span>
+    <span class="p">}</span>
+  <span class="p">},</span> <span class="p">{</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"The Parley Letter"</span><span class="p">,</span>
+    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
+      <span class="s2">"author"</span><span class="o">:</span> <span class="mi">12</span>
+    <span class="p">}</span>
+  <span class="p">},</span> <span class="p">{</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Dependency Injection is Not a Virtue"</span><span class="p">,</span>
+    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
+      <span class="s2">"author"</span><span class="o">:</span> <span class="mi">12</span>
+    <span class="p">}</span>
+  <span class="p">}]</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>In this example, the author URL for all three posts is <code>/people/12</code>.</p>
+
+<p>Top-level URL templates allow you to specify relationships as IDs, but without requiring that clients hard-code information about how to form the URLs. </p>
+
+<h3>Compound Documents</h3>
+
+<p>To save HTTP requests, it may be convenient to send related documents along with the requested documents.</p>
+
+<p>In this case, a bit of extra metadata for each relationship can link together the documents.</p>
+
+<div class="highlight"><pre><span class="p">{</span>
+  <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
+    <span class="s2">"posts.author"</span><span class="o">:</span> <span class="p">{</span>
+      <span class="s2">"url"</span><span class="o">:</span> <span class="s2">"http://example.com/people/{post.author}"</span><span class="p">,</span>
+      <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"people"</span>
+    <span class="p">},</span>
+    <span class="s2">"posts.comments"</span><span class="o">:</span> <span class="p">{</span>
+      <span class="s2">"url"</span><span class="o">:</span> <span class="s2">"http://example.com/comments/{post.comments}"</span><span class="p">,</span>
+      <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"comments"</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">[{</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span><span class="p">,</span>
+    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
+      <span class="s2">"author"</span><span class="o">:</span> <span class="mi">9</span><span class="p">,</span>
+      <span class="s2">"comments"</span><span class="o">:</span> <span class="p">[</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span> <span class="p">]</span>
+   <span class="p">},</span> <span class="p">{</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"The Parley Letter"</span><span class="p">,</span>
+    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
+      <span class="s2">"author"</span><span class="o">:</span> <span class="mi">9</span><span class="p">,</span>
+      <span class="s2">"comments"</span><span class="o">:</span> <span class="p">[</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span> <span class="p">]</span>
+   <span class="p">},</span> <span class="p">{</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Dependency Injection is Not a Virtue"</span><span class="p">,</span>
+    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
+      <span class="s2">"author"</span><span class="o">:</span> <span class="mi">9</span><span class="p">,</span>
+      <span class="s2">"comments"</span><span class="o">:</span> <span class="p">[</span> <span class="mi">6</span> <span class="p">]</span>
+    <span class="p">}</span>
+  <span class="p">}],</span>
+  <span class="s2">"people"</span><span class="o">:</span> <span class="p">[{</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">9</span><span class="p">,</span>
+    <span class="s2">"name"</span><span class="o">:</span> <span class="s2">"@d2h"</span>
+  <span class="p">}],</span>
+  <span class="s2">"comments"</span><span class="o">:</span> <span class="p">[{</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"Mmmmmakase"</span>
+  <span class="p">},</span> <span class="p">{</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"I prefer unagi"</span>
+  <span class="p">},</span> <span class="p">{</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"What's Omakase?"</span>
+  <span class="p">},</span> <span class="p">{</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"Parley is a discussion, especially one between enemies"</span>
+  <span class="p">},</span> <span class="p">{</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"The parsley letter"</span>
+  <span class="p">},</span> <span class="p">{</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">6</span><span class="p">,</span>
+    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"Dependency Injection is Not a Vice"</span>
+  <span class="p">}]</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>The benefit of this approach is that when the same document is referenced multiple times (in this example, the author of the three posts), it only needs to be presented a single time in the document.</p>
+
+<p>By always combining documents in this way, a client can consistently extract and wire up references.</p>
+
+<p>JSON API documents <strong>MAY</strong> specify the URL for a document in a compound response by specifying a <code>"url"</code> key:</p>
+
+<div class="highlight"><pre><span class="p">{</span>
+  <span class="c1">// ...</span>
+  <span class="s2">"comments"</span><span class="o">:</span> <span class="p">[{</span>
+    <span class="s2">"url"</span><span class="o">:</span> <span class="s2">"http://example.com/comments/1"</span><span class="p">,</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"Mmmmmakase"</span>
+  <span class="p">},</span> <span class="p">{</span>
+    <span class="s2">"url"</span><span class="o">:</span> <span class="s2">"http://example.com/comments/2"</span><span class="p">,</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"I prefer unagi"</span>
+  <span class="p">},</span> <span class="p">{</span>
+    <span class="s2">"url"</span><span class="o">:</span> <span class="s2">"http://example.com/comments/3"</span><span class="p">,</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"What's Omakase?"</span>
+  <span class="p">},</span> <span class="p">{</span>
+    <span class="s2">"url"</span><span class="o">:</span> <span class="s2">"/comments/1"</span><span class="p">,</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"Parley is a discussion, especially one between enemies"</span>
+  <span class="p">},</span> <span class="p">{</span>
+    <span class="s2">"url"</span><span class="o">:</span> <span class="s2">"/comments/1"</span><span class="p">,</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"The parsley letter"</span>
+  <span class="p">},</span> <span class="p">{</span>
+    <span class="s2">"url"</span><span class="o">:</span> <span class="s2">"/comments/1"</span><span class="p">,</span>
+    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">6</span><span class="p">,</span>
+    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"Dependency Injection is Not a Vice"</span>
+  <span class="p">}]</span>
+<span class="p">}</span>
+</pre></div>
         </section>
 
         <footer>
-        JSON API was created by <a
-          hred="https://github.com/wycats">wycats</a>. This page is currently maintained by <a href="https://github.com/brixen">brixen</a><br>
+          JSON API is maintained by <a href="https://github.com/brixen">brixen</a><br>
           This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="http://twitter.com/jasonlong">Jason Long</a>.
         </footer>
 
