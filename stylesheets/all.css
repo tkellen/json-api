@@ -1,11 +1,11 @@
-/* line 3, /Users/steve/src/jsonapi/build/source/stylesheets/all.css.scss */
+/* line 3, /Users/steve/src/jsonapi/source/stylesheets/all.css.scss */
 html {
   display: -webkit-flex;
   -webkit-flex-direction: row;
   -webkit-justify-content: center;
   background-color: #f0fff0; }
 
-/* line 10, /Users/steve/src/jsonapi/build/source/stylesheets/all.css.scss */
+/* line 10, /Users/steve/src/jsonapi/source/stylesheets/all.css.scss */
 body {
   width: 700px;
   border: 1px solid #ccc;
@@ -18,19 +18,19 @@ body {
   box-shadow: 0 0 5px 0px #cec;
   font-family: "Titillium Web"; }
 
-/* line 23, /Users/steve/src/jsonapi/build/source/stylesheets/all.css.scss */
+/* line 23, /Users/steve/src/jsonapi/source/stylesheets/all.css.scss */
 ul {
   margin-bottom: 20px; }
 
-/* line 27, /Users/steve/src/jsonapi/build/source/stylesheets/all.css.scss */
+/* line 27, /Users/steve/src/jsonapi/source/stylesheets/all.css.scss */
 a {
   color: #393; }
 
-/* line 31, /Users/steve/src/jsonapi/build/source/stylesheets/all.css.scss */
+/* line 31, /Users/steve/src/jsonapi/source/stylesheets/all.css.scss */
 a:hover {
   color: #050; }
 
-/* line 35, /Users/steve/src/jsonapi/build/source/stylesheets/all.css.scss */
+/* line 35, /Users/steve/src/jsonapi/source/stylesheets/all.css.scss */
 h1 {
   margin-top: 0;
   padding: 20px 30px 30px 30px;
@@ -39,24 +39,24 @@ h1 {
   font-family: "Titillium Web", sans-serif;
   font-weight: bold; }
 
-/* line 45, /Users/steve/src/jsonapi/build/source/stylesheets/all.css.scss */
+/* line 45, /Users/steve/src/jsonapi/source/stylesheets/all.css.scss */
 h2 {
   font-size: 16px;
   color: #676;
   border-bottom: 3px solid #aba; }
 
-/* line 51, /Users/steve/src/jsonapi/build/source/stylesheets/all.css.scss */
+/* line 51, /Users/steve/src/jsonapi/source/stylesheets/all.css.scss */
 h3 {
   color: #898; }
 
-/* line 55, /Users/steve/src/jsonapi/build/source/stylesheets/all.css.scss */
+/* line 55, /Users/steve/src/jsonapi/source/stylesheets/all.css.scss */
 h4 {
   color: #9a9; }
 
-/* line 60, /Users/steve/src/jsonapi/build/source/stylesheets/all.css.scss */
+/* line 60, /Users/steve/src/jsonapi/source/stylesheets/all.css.scss */
 ul {
   margin-left: 0;
   padding-left: 0; }
-  /* line 64, /Users/steve/src/jsonapi/build/source/stylesheets/all.css.scss */
+  /* line 64, /Users/steve/src/jsonapi/source/stylesheets/all.css.scss */
   ul li {
     margin-left: 20px; }
