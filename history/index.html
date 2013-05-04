@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    
+    <!-- Always force latest IE rendering engine or request Chrome Frame -->
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    
+    <!-- Use title if it's in the page YAML frontmatter -->
+    <title>The Middleman</title>
+    
+    <link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,600,700,900' rel='stylesheet' type='text/css'>
+    <link href="/stylesheets/normalize.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="/stylesheets/highlight.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="/stylesheets/all.css" media="screen" rel="stylesheet" type="text/css" />
+    <script src="/javascripts/all.js" type="text/javascript"></script>
+  </head>
+  
+  <body class="history history_index">
+    <hr>
+<h2 class='anchorable-toc' id='toc_title-json-api-history'>title: JSON API: History</h2><h1 class='anchorable-toc' id='toc_json-api-history'>JSON API: History</h1>
+<p>See also </p>
+
+<ul>
+<li><a href="/">Reading</a></li>
+<li><a href="/write">Writing</a></li>
+</ul>
+<h2 class='anchorable-toc' id='toc_note'>NOTE</h2>
+<p><em>This document is a work in progress, and will likely change over the
+next month as implementation work progresses. It is currently missing
+some details about the <code>meta</code> attribute and could be more precise about
+details of working with relationships.</em></p>
+
+<p><em>Please feel free to help flesh it out or if you try to write an
+implementation, tell us where things were ambiguous.</em></p>
+
+<p><em>You can do so by filing an Issue against <a href="https://github.com/json-api/json-api/issues">our GitHub
+repository.</a></em></p>
+<h2 class='anchorable-toc' id='toc_history'>History</h2>
+<p>JSON API is extracted from the JSON transport implicitly defined by
+Ember Data&#39;s REST adapter.</p>
+
+<p>In general, Ember Data&#39;s goal is to eliminate the need for ad-hoc code
+per application to communicate with servers that communicate in a
+well-defined way.</p>
+
+<p>Some servers, like Firebase, Parse and CouchDB already define strict
+communication protocols for clients, and were good fits for Ember Data.
+In contrast, servers written in Rails, Node, and Django tend to be
+written in a &quot;REST-style&quot; but lack the precision necessary for drop-in
+client code.</p>
+
+<p>The REST Adapter in Ember Data implicitly defined a protocol that
+custom servers could implement to get a drop-in client for all of their
+resources. <a href="https://github.com/rails-api/active_model_serializers">ActiveModel::Serializers</a> is a proof-of-concept library
+for Rails that implemented the serialization format expected by Ember
+Data.</p>
+
+<p>Record creation, update, and deletion was defined implicitly by the
+Ember Data library and was close to conventions already in wide use by
+Rails, Django and Node developers.</p>
+
+<p>The goals of the protocols defined by the Ember Data REST Adapter and
+JSON API are to balance:</p>
+
+<ul>
+<li>A generic protocol that can work across a broad set of use cases,
+including the generally used relationship types</li>
+<li>Similarity to existing server-side framework practices (and human
+readability for debugging)</li>
+<li>Ease of implementation on the server side </li>
+<li>Ease of implementation on the client side</li>
+</ul>
+
+<p>This protocol is still a work in progress, and we are extremely open to
+feedback and proposals for improvement. That said, implementation work
+has already begun, and we value good working systems over perfect
+vaporware.</p>
+
+  </body>
+</html>

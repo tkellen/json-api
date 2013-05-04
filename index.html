@@ -18,7 +18,12 @@
   
   <body class="index">
     <h1 class='anchorable-toc' id='toc_json-api'>JSON API</h1>
-<p>See also <a href="/write">JSON API Updating</a>.</p>
+<p>See also: </p>
+
+<ul>
+<li><a href="/write">Updating</a></li>
+<li><a href="/history">History</a></li>
+</ul>
 <h2 class='anchorable-toc' id='toc_note'>NOTE</h2>
 <p><em>This document is a work in progress, and will likely change over the
 next month as implementation work progresses. It is currently missing
@@ -29,73 +34,7 @@ details of working with relationships.</em></p>
 implementation, tell us where things were ambiguous.</em></p>
 
 <p><em>You can do so by filing an Issue against <a href="https://github.com/json-api/json-api/issues">our GitHub
-repository</a>.</em></p>
-<h2 class='anchorable-toc' id='toc_history'>History</h2>
-<p>JSON API is extracted from the JSON transport implicitly defined by
-Ember Data&#39;s REST adapter.</p>
-
-<p>In general, Ember Data&#39;s goal is to eliminate the need for ad-hoc code
-per application to communicate with servers that communicate in a
-well-defined way.</p>
-
-<p>Some servers, like Firebase, Parse and CouchDB already define strict
-communication protocols for clients, and were good fits for Ember Data.
-In contrast, servers written in Rails, Node, and Django tend to be
-written in a &quot;REST-style&quot; but lack the precision necessary for drop-in
-client code.</p>
-
-<p>The REST Adapter in Ember Data implicitly defined a protocol that
-custom servers could implement to get a drop-in client for all of their
-resources. <a href="https://github.com/rails-api/active_model_serializers">ActiveModel::Serializers</a> is a proof-of-concept library
-for Rails that implemented the serialization format expected by Ember
-Data.</p>
-
-<p>Record creation, update, and deletion was defined implicitly by the
-Ember Data library and was close to conventions already in wide use by
-Rails, Django and Node developers.</p>
-
-<p>The goals of the protocols defined by the Ember Data REST Adapter and
-JSON API are to balance:</p>
-
-<ul>
-<li>A generic protocol that can work across a broad set of use cases,
-including the generally used relationship types</li>
-<li>Similarity to existing server-side framework practices (and human
-readability for debugging)</li>
-<li>Ease of implementation on the server side </li>
-<li>Ease of implementation on the client side</li>
-</ul>
-
-<p>This protocol is still a work in progress, and we are extremely open to
-feedback and proposals for improvement. That said, implementation work
-has already begun, and we value good working systems over perfect
-vaporware.</p>
-<h2 class='anchorable-toc' id='toc_protocol-improvements'>Protocol Improvements</h2>
-<p>JSON API is an attempt to extract and formalize a protocol that has
-worked well for us, and to simplify areas that hid implicit requirements
-tied to the specific implementations Ember Data users were working with.</p>
-
-<p>In particular:</p>
-
-<ul>
-<li>JSON API defines a URL-based style that allows servers to provide URLs
-and URL templates to supplement Ember Data&#39;s inflector-based approach.
-This allows servers to be explicit about where to find related
-documents instead of having to ensure that their documents were
-located in a conventional place.</li>
-<li>JSON API differentiates between attributes and relationships, using a
-<code>rels</code> key to group a document&#39;s relationships.</li>
-<li>JSON API makes heavy use of the <code>PATCH</code> verb and <a href="http://tools.ietf.org/html/rfc6902">JSON Patch</a>
-specification, which provides a unified way to modify the attributes
-and relationships of a document, without requiring that the entire
-document be updated at once. This helps to solve some thorny issues
-with relationships that the original proof-of-concept protocol had
-a lot of trouble with.</li>
-<li>JSON API defines precise semantics for compound documents and
-responses from <code>POST</code>, <code>PATCH</code>, and <code>DELETE</code>, while the original
-protocol had subtle differences in different parts of the
-implementation.</li>
-</ul>
+repository.</a></em></p>
 <h2 class='anchorable-toc' id='toc_abstract'>Abstract</h2>
 <p>There are two JSON API styles:</p>
 
