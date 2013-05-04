@@ -1,497 +1,797 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <title>JSON API by brixen</title>
+    <meta charset="utf-8">
+    
+    <!-- Always force latest IE rendering engine or request Chrome Frame -->
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    
+    <!-- Use title if it's in the page YAML frontmatter -->
+    <title>JSON API</title>
+    
+    <link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,600,700,900' rel='stylesheet' type='text/css'>
+    <link href="/stylesheets/normalize.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="/stylesheets/highlight.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="/stylesheets/all.css" media="screen" rel="stylesheet" type="text/css" />
+    <script src="/javascripts/all.js" type="text/javascript"></script>
   </head>
+  
+  <body class="index">
+    <h1 class='anchorable-toc' id='toc_json-api'>JSON API</h1>
+<p>See also <a href="/write">JSON API Updating</a>.</p>
+<h2 class='anchorable-toc' id='toc_history'>History</h2>
+<p>JSON API is extracted from the JSON transport implicitly defined by
+Ember Data&#39;s REST adapter.</p>
 
-  <body>
-    <div id="container">
-      <div class="inner">
+<p>In general, Ember Data&#39;s goal is to eliminate the need for ad-hoc code
+per application to communicate with servers that communicate in a
+well-defined way.</p>
 
-        <header>
-          <h1>JSON API</h1>
-          <h2></h2>
-        </header>
+<p>Some servers, like Firebase, Parse and CouchDB already define strict
+communication protocols for clients, and were good fits for Ember Data.
+In contrast, servers written in Rails, Node, and Django tend to be
+written in a &quot;REST-style&quot; but lack the precision necessary for drop-in
+client code.</p>
 
-        <hr>
+<p>The REST Adapter in Ember Data implicitly defined a protocol that
+custom servers could implement to get a drop-in client for all of their
+resources. <a href="https://github.com/rails-api/active_model_serializers">ActiveModel::Serializers</a> is a proof-of-concept library
+for Rails that implemented the serialization format expected by Ember
+Data.</p>
 
-        <section id="main_content">
-<p><strong>This document is a work-in-progress and subject to revision. This document will clearly state when it is considered a final version and what that version number is.</strong></p>
+<p>Record creation, update, and deletion was defined implicitly by the
+Ember Data library and was close to conventions already in wide use by
+Rails, Django and Node developers.</p>
 
+<p>The goals of the protocols defined by the Ember Data REST Adapter and
+JSON API are to balance:</p>
+
+<ul>
+<li>A generic protocol that can work across a broad set of use cases,
+including the generally used relationship types</li>
+<li>Similarity to existing server-side framework practices (and human
+readability for debugging)</li>
+<li>Ease of implementation on the server side </li>
+<li>Ease of implementation on the client side</li>
+</ul>
+
+<p>This protocol is still a work in progress, and we are extremely open to
+feedback and proposals for improvement. That said, implementation work
+has already begun, and we value good working systems over perfect
+vaporware.</p>
+<h2 class='anchorable-toc' id='toc_protocol-improvements'>Protocol Improvements</h2>
+<p>JSON API is an attempt to extract and formalize a protocol that has
+worked well for us, and to simplify areas that hid implicit requirements
+tied to the specific implementations Ember Data users were working with.</p>
+
+<p>In particular:</p>
+
+<ul>
+<li>JSON API defines a URL-based style that allows servers to provide URLs
+and URL templates to supplement Ember Data&#39;s inflector-based approach.
+This allows servers to be explicit about where to find related
+documents instead of having to ensure that their documents were
+located in a conventional place.</li>
+<li>JSON API differentiates between attributes and relationships, using a
+<code>rels</code> key to group a document&#39;s relationships.</li>
+<li>JSON API makes heavy use of the <code>PATCH</code> verb and <a href="http://tools.ietf.org/html/rfc6902">JSON Patch</a>
+specification, which provides a unified way to modify the attributes
+and relationships of a document, without requiring that the entire
+document be updated at once. This helps to solve some thorny issues
+with relationships that the original proof-of-concept protocol had
+a lot of trouble with.</li>
+<li>JSON API defines precise semantics for compound documents and
+responses from <code>POST</code>, <code>PATCH</code>, and <code>DELETE</code>, while the original
+protocol had subtle differences in different parts of the
+implementation.</li>
+</ul>
+<h2 class='anchorable-toc' id='toc_abstract'>Abstract</h2>
 <p>There are two JSON API styles:</p>
 
 <ul>
-<li>The ID Style</li>
-<li>The URL Style</li>
-</ul><p>The ID style is the easiest to get started with, but requires that your clients be able to guess the URLs for related documents. It also locks your API into a particular URL structure, which may become a problem as your API grows.</p>
+<li><a href="#toc_id-based-json-api">The ID Style</a></li>
+<li><a href="#toc_url-based-json-api">The URL Style</a></li>
+</ul>
 
-<p>The URL style requires less guessing on the client side, and makes clients more resilient to API changes, but is trickier to use with relationships and compound documents.</p>
+<p>The ID style is the easiest to get started with, but requires that your
+clients be able to guess the URLs for related documents. It also locks
+your API into a particular URL structure, which may become a problem as
+your API grows.</p>
 
-<p>In general, you should be able to start with an ID-based JSON API and upgrade to a URL-based API, if you want.</p>
+<p>The URL style requires less guessing on the client side, and makes
+clients more resilient to API changes, but is trickier to use with
+relationships and compound documents.</p>
 
-<h2>Document</h2>
-
-<p>In this specification, the term "document" refers to a single object with a set of attributes and relationships.</p>
+<p>In general, you should be able to start with an ID-based JSON API and
+upgrade to a URL-based API, if you want more control over the precise
+URLs used for a resource.</p>
+<h2 class='anchorable-toc' id='toc_document'>Document</h2>
+<p>In this specification, the term &quot;document&quot; refers to a single object with a set of attributes and relationships.</p>
 
 <p>A JSON response may include multiple documents, as described below.</p>
+<h2 class='anchorable-toc' id='toc_reserved-attributes'>Reserved Attributes</h2>
+<p>There are three reserved attribute names in JSON API:</p>
 
-<h2>ID-Based JSON API</h2>
+<ul>
+<li><code>id</code></li>
+<li><code>href</code></li>
+<li><code>rels</code></li>
+</ul>
 
-<h3>Top Level</h3>
-
+<p>Each of these names has a special meaning when included in the
+attributes section and should not be used as attribute names.</p>
+<h2 class='anchorable-toc' id='toc_id-based-json-api'>ID-Based JSON API</h2><h3 class='anchorable-toc' id='toc_top-level'>Top Level</h3>
 <p>The top-level of a JSON API document <strong>MAY</strong> have the following keys:</p>
 
 <ul>
-<li>
-<code>meta</code>: meta-information about a resource, such as pagination</li>
+<li><code>meta</code>: meta-information about a resource, such as pagination</li>
 <li>Other resource names (<code>posts</code>, <code>comments</code>, <code>people</code>, etc.) </li>
-</ul><h3>Singular Resources</h3>
-
+</ul>
+<h3 class='anchorable-toc' id='toc_singular-resources'>Singular Resources</h3>
 <p>If the value of a resource key is a JSON object, the value represents a single document.</p>
-
-<div class="highlight"><pre><span class="p">{</span>
-  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
-    <span class="c1">// an individual post document</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-
+<div class="highlight javascript "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+</pre></td>
+  <td class="code"><pre>{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: {
+    <span class="comment">// an individual post document</span>
+  }
+}
+</pre></td>
+</tr></table>
+</div>
 <p>The document <strong>MUST</strong> contain an <code>id</code> key. </p>
-
-<h3>Resource Collections</h3>
-
+<h3 class='anchorable-toc' id='toc_resource-collections'>Resource Collections</h3>
 <p>If the value of a resource key is a JSON array, the value represents a list of documents.</p>
-
-<div class="highlight"><pre><span class="p">{</span>
-  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">[{</span>
-    <span class="c1">// an individual post document</span>
-  <span class="p">},</span> <span class="p">{</span>
-    <span class="c1">// an individual post document</span>
-  <span class="p">}]</span>
-<span class="p">}</span>
-</pre></div>
-
+<div class="highlight js "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+</pre></td>
+  <td class="code"><pre>{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: [{
+    <span class="comment">// an individual post document</span>
+  }, {
+    <span class="comment">// an individual post document</span>
+  }]
+}
+</pre></td>
+</tr></table>
+</div>
 <p>Each document in the list <strong>MUST</strong> contain an <code>id</code> key.</p>
-
-<h3>IDs</h3>
-
-<p>The <code>"id"</code> key in a document represents a unique identifier for the document, scoped to the document's type. The type scope is implicit, and hardcoded into clients of the API.</p>
-
-<h3>Attributes</h3>
-
-<p>Other than the <code>"rels"</code> and <code>"id"</code> keys, every key in a document represents an attribute. An attribute's value may be any JSON value.</p>
-
-<div class="highlight"><pre><span class="p">{</span>
-  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-
-<h3>Relationships</h3>
-
-<p>The value of the <code>"rels"</code> key is a JSON object that represents related documents.</p>
-
-<div class="highlight"><pre><span class="p">{</span>
-  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span><span class="p">,</span>
-    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
-      <span class="s2">"author"</span><span class="o">:</span> <span class="mi">9</span><span class="p">,</span>
-      <span class="s2">"comments"</span><span class="o">:</span> <span class="p">[</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">20</span> <span class="p">]</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-
-<h4>To-Many Relationships</h4>
-
+<h3 class='anchorable-toc' id='toc_ids'>IDs</h3>
+<p>The <code>&quot;id&quot;</code> key in a document represents a unique identifier for the document, scoped to the document&#39;s type. The type scope is implicit, and hardcoded into clients of the API.</p>
+<h3 class='anchorable-toc' id='toc_attributes'>Attributes</h3>
+<p>Other than the <code>&quot;rels&quot;</code> and <code>&quot;id&quot;</code> keys, every key in a document represents an attribute. An attribute&#39;s value may be any JSON value.</p>
+<div class="highlight js "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+</pre></td>
+  <td class="code"><pre>{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Rails is Omakase</span><span class="delimiter">&quot;</span></span>
+  }
+}
+</pre></td>
+</tr></table>
+</div><h3 class='anchorable-toc' id='toc_relationships'>Relationships</h3>
+<p>The value of the <code>&quot;rels&quot;</code> key is a JSON object that represents related documents.</p>
+<div class="highlight js "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+<strong>10</strong>
+</pre></td>
+  <td class="code"><pre>{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Rails is Omakase</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">author</span><span class="delimiter">&quot;</span></span>: <span class="integer">9</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">comments</span><span class="delimiter">&quot;</span></span>: [ <span class="integer">5</span>, <span class="integer">12</span>, <span class="integer">17</span>, <span class="integer">20</span> ]
+    }
+  }
+}
+</pre></td>
+</tr></table>
+</div><h4 class='anchorable-toc' id='toc_to-many-relationships'>To-Many Relationships</h4>
 <p>A to-many relationship is represented as a JSON array of IDs.</p>
-
-<div class="highlight"><pre><span class="p">{</span>
-  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span><span class="p">,</span>
-    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
-      <span class="s2">"comments"</span><span class="o">:</span> <span class="p">[</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">20</span> <span class="p">]</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-
+<div class="highlight js "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td>
+  <td class="code"><pre>{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Rails is Omakase</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">comments</span><span class="delimiter">&quot;</span></span>: [ <span class="integer">5</span>, <span class="integer">12</span>, <span class="integer">17</span>, <span class="integer">20</span> ]
+    }
+  }
+}
+</pre></td>
+</tr></table>
+</div>
 <p>An API that provides a to-many relationship as an array of IDs <strong>MUST</strong> respond to a <code>GET</code> request with a list of the specified documents with a URL formed by joining:</p>
 
 <ul>
 <li>A base URL that represents the type of the related resource (this must be hardcoded in the client)</li>
 <li><code>?ids=</code></li>
 <li>A comma-separated list of the specified IDs</li>
-</ul><p>In the above example, a <code>GET</code> request to <code>/comments?ids=5,12,17,20</code> returns a document containing the four specified comments.</p>
+</ul>
 
-<h4>To-One Relationships</h4>
-
+<p>In the above example, a <code>GET</code> request to <code>/comments?ids=5,12,17,20</code> returns a document containing the four specified comments.</p>
+<h4 class='anchorable-toc' id='toc_to-one-relationships'>To-One Relationships</h4>
 <p>A to-one relationship is represented as a single string or number value.</p>
-
-<div class="highlight"><pre><span class="p">{</span>
-  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span><span class="p">,</span>
-    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
-      <span class="s2">"author"</span><span class="o">:</span> <span class="mi">17</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-
+<div class="highlight js "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td>
+  <td class="code"><pre>{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Rails is Omakase</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">author</span><span class="delimiter">&quot;</span></span>: <span class="integer">17</span>
+    }
+  }
+}
+</pre></td>
+</tr></table>
+</div>
 <p>An API that provides a to-one relationship as an ID <strong>MUST</strong> respond to a <code>GET</code> request with the specified document with a URL formed by joining:</p>
 
 <ul>
 <li>A base URL that represents the type of the related resource (this must be hardcoded in the client)</li>
 <li><code>/</code></li>
 <li>The specified ID</li>
-</ul><p>In the above example, a <code>GET</code> request to <code>/people/17</code> returns a document containing the specified author.</p>
+</ul>
 
-<h3>Compound Documents</h3>
-
+<p>In the above example, a <code>GET</code> request to <code>/people/17</code> returns a document containing the specified author.</p>
+<h3 class='anchorable-toc' id='toc_compound-documents'>Compound Documents</h3>
 <p>To save HTTP requests, it may be convenient to send related documents along with the requested documents.</p>
-
-<div class="highlight"><pre><span class="p">{</span>
-  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span><span class="p">,</span>
-    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
-      <span class="s2">"author"</span><span class="o">:</span> <span class="mi">9</span>
-    <span class="p">}</span>
-  <span class="p">},</span>
-  <span class="s2">"people"</span><span class="o">:</span> <span class="p">[{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">9</span><span class="p">,</span>
-    <span class="s2">"name"</span><span class="o">:</span> <span class="s2">"@d2h"</span>
-  <span class="p">}]</span>
-<span class="p">}</span>
-</pre></div>
-
+<div class="highlight js "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+<strong>10</strong>
+11
+12
+13
+</pre></td>
+  <td class="code"><pre>{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Rails is Omakase</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">author</span><span class="delimiter">&quot;</span></span>: <span class="integer">9</span>
+    }
+  },
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">people</span><span class="delimiter">&quot;</span></span>: [{
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">9</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">@d2h</span><span class="delimiter">&quot;</span></span>
+  }]
+}
+</pre></td>
+</tr></table>
+</div>
 <p>The related documents are provided as an additional top-level document or document list whose key is a name that represents the document type.</p>
 
-<p>The linkage between the key under <code>"rels"</code> and the top-level keys is hardcoded into the client.</p>
-
-<h2>URL-Based JSON API</h2>
-
+<p>The linkage between the key under <code>&quot;rels&quot;</code> and the top-level keys is hardcoded into the client.</p>
+<h2 class='anchorable-toc' id='toc_url-based-json-api'>URL-Based JSON API</h2>
 <p>In the above description of ID-based JSON, there were several places where information about the location of related resources needed to be hardcoded into the client.</p>
 
 <p>The goal of the URL-Based JSON API is to eliminate the need for those specific instances of hardcoded information.</p>
-
-<h3>Top Level</h3>
-
+<h3 class='anchorable-toc' id='toc_top-level'>Top Level</h3>
 <p>The top-level of a JSON API document <strong>MAY</strong> have the following keys:</p>
 
 <ul>
-<li>
-<code>meta</code>: meta-information about a resource, such as pagination</li>
-<li>
-<code>rels</code>: in compound resources, information about relationships that would otherwise need to be repeated</li>
+<li><code>meta</code>: meta-information about a resource, such as pagination</li>
+<li><code>rels</code>: in compound resources, information about relationships that would otherwise need to be repeated</li>
 <li>Other resource names (<code>posts</code>, <code>comments</code>, <code>people</code>, etc.) </li>
-</ul><h3>Singular Resources</h3>
-
+</ul>
+<h3 class='anchorable-toc' id='toc_singular-resources'>Singular Resources</h3>
 <p>If the value of a resource key is a JSON object, the value represents a single document.</p>
-
-<div class="highlight"><pre><span class="p">{</span>
-  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
-    <span class="c1">// an individual post document</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-
+<div class="highlight js "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+</pre></td>
+  <td class="code"><pre>{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: {
+    <span class="comment">// an individual post document</span>
+  }
+}
+</pre></td>
+</tr></table>
+</div>
 <p>The document <strong>MAY</strong> contain an <code>id</code> key. </p>
-
-<h3>Resource Collections</h3>
-
+<h3 class='anchorable-toc' id='toc_resource-collections'>Resource Collections</h3>
 <p>If the value of a resource key is a JSON array, the value represents a list of documents.</p>
-
-<div class="highlight"><pre><span class="p">{</span>
-  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">[{</span>
-    <span class="c1">// an individual post document</span>
-  <span class="p">},</span> <span class="p">{</span>
-    <span class="c1">// an individual post document</span>
-  <span class="p">}]</span>
-<span class="p">}</span>
-</pre></div>
-
+<div class="highlight js "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+</pre></td>
+  <td class="code"><pre>{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: [{
+    <span class="comment">// an individual post document</span>
+  }, {
+    <span class="comment">// an individual post document</span>
+  }]
+}
+</pre></td>
+</tr></table>
+</div>
 <p>Each document in the list <strong>MAY</strong> contain an <code>id</code> key.</p>
-
-<h3>IDs</h3>
-
-<p>The <code>"id"</code> key in a document represents a unique identifier for the document, scoped to the document's type. It can be used with URL templates to fetch related records, as described below.</p>
-
-<h3>Attributes</h3>
-
-<p>Other than the <code>"rels"</code> and <code>"id"</code> keys, every key in a document represents an attribute. An attribute's value may be any JSON value.</p>
-
-<div class="highlight"><pre><span class="p">{</span>
-  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-
-<h3>Relationships</h3>
-
-<p>The value of the <code>"rels"</code> key is a JSON object that represents related documents.</p>
-
-<div class="highlight"><pre><span class="p">{</span>
-  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span><span class="p">,</span>
-    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
-      <span class="s2">"author"</span><span class="o">:</span> <span class="s2">"http://example.com/people/1"</span><span class="p">,</span>
-      <span class="s2">"comments"</span><span class="o">:</span> <span class="s2">"http://example.com/comments/5,12,17,20"</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-
-<h4>To-Many Relationships</h4>
-
+<h3 class='anchorable-toc' id='toc_ids'>IDs</h3>
+<p>The <code>&quot;id&quot;</code> key in a document represents a unique identifier for the document, scoped to the document&#39;s type. It can be used with URL templates to fetch related records, as described below.</p>
+<h3 class='anchorable-toc' id='toc_attributes'>Attributes</h3>
+<p>Other than the <code>&quot;rels&quot;</code> and <code>&quot;id&quot;</code> keys, every key in a document represents an attribute. An attribute&#39;s value may be any JSON value.</p>
+<div class="highlight js "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+</pre></td>
+  <td class="code"><pre>{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Rails is Omakase</span><span class="delimiter">&quot;</span></span>
+  }
+}
+</pre></td>
+</tr></table>
+</div><h3 class='anchorable-toc' id='toc_relationships'>Relationships</h3>
+<p>The value of the <code>&quot;rels&quot;</code> key is a JSON object that represents related documents.</p>
+<div class="highlight js "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+<strong>10</strong>
+</pre></td>
+  <td class="code"><pre>{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Rails is Omakase</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">author</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">http://example.com/people/1</span><span class="delimiter">&quot;</span></span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">comments</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">http://example.com/comments/5,12,17,20</span><span class="delimiter">&quot;</span></span>
+    }
+  }
+}
+</pre></td>
+</tr></table>
+</div><h4 class='anchorable-toc' id='toc_to-many-relationships'>To-Many Relationships</h4>
 <p>A to-many relationship is a string value that represents a URL.</p>
-
-<div class="highlight"><pre><span class="p">{</span>
-  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span><span class="p">,</span>
-    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
-      <span class="s2">"comments"</span><span class="o">:</span> <span class="s2">"http://example.com/posts/1/comments"</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-
+<div class="highlight js "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td>
+  <td class="code"><pre>{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Rails is Omakase</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">comments</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">http://example.com/posts/1/comments</span><span class="delimiter">&quot;</span></span>
+    }
+  }
+}
+</pre></td>
+</tr></table>
+</div>
 <p>An API that provides a to-many relationship as a URL <strong>MUST</strong> respond to a <code>GET</code> request with a list of the specified documents with the specified URL.</p>
 
 <p>In the above example, a <code>GET</code> request to <code>/posts/1/comments</code> returns a document containing the four specified comments.</p>
-
-<h4>To-One Relationships</h4>
-
+<h4 class='anchorable-toc' id='toc_to-one-relationships'>To-One Relationships</h4>
 <p>A to-one relationship is represented as a string value that represents a URL.</p>
-
-<div class="highlight"><pre><span class="p">{</span>
-  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span><span class="p">,</span>
-    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
-      <span class="s2">"author"</span><span class="o">:</span> <span class="s2">"http://example.com/people/17"</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-
+<div class="highlight js "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td>
+  <td class="code"><pre>{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Rails is Omakase</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">author</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">http://example.com/people/17</span><span class="delimiter">&quot;</span></span>
+    }
+  }
+}
+</pre></td>
+</tr></table>
+</div>
 <p>An API that provides a to-one relationship as an ID <strong>MUST</strong> respond to a <code>GET</code> request with the specified document with the specified URL.</p>
 
 <p>In the above example, a <code>GET</code> request to <code>/people/17</code> returns a document containing the specified author.</p>
-
-<h3>URL Template Shorthands</h3>
-
-<p>When returning a list of documents from a response, a top-level <code>"rels"</code> object can specify a URL template that should be used for all documents.</p>
+<h3 class='anchorable-toc' id='toc_url-template-shorthands'>URL Template Shorthands</h3>
+<p>When returning a list of documents from a response, a top-level <code>&quot;rels&quot;</code> object can specify a URL template that should be used for all documents.</p>
 
 <p>Example:</p>
-
-<div class="highlight"><pre><span class="p">{</span>
-  <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
-    <span class="s2">"posts.comments"</span><span class="o">:</span> <span class="s2">"http://example.com/posts/{post.id}/comments"</span>
-  <span class="p">},</span>
-  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">[{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span>
-  <span class="p">},</span> <span class="p">{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"The Parley Letter"</span>
-  <span class="p">}]</span>
-<span class="p">}</span>
-</pre></div>
-
-<p>In this example, fetching <code>/posts/1/comments</code> will fetch the comments for <code>"Rails is Omakase"</code> and fetching <code>/posts/2/comments</code> will fetch the comments for <code>"The Parley Letter"</code>.</p>
-
-<div class="highlight"><pre><span class="p">{</span>
-  <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
-    <span class="s2">"posts.comments"</span><span class="o">:</span> <span class="s2">"http://example.com/comments/{posts.comments}"</span>
-  <span class="p">},</span>
-  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span><span class="p">,</span>
-    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
-      <span class="s2">"comments"</span><span class="o">:</span> <span class="p">[</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span> <span class="p">]</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-
-<p>In this example, the <code>posts.comments</code> variable is expanded by "exploding" the array specified in the <code>"rels"</code> section of each post. The <a href="https://tools.ietf.org/html/rfc6570">URL template specification</a> specifies that the default explosion is to join the array members by a comma, so in this example, fetching <code>/comments/1,2,3,4</code> will return a list of all comments.</p>
+<div class="highlight js "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+<strong>10</strong>
+11
+12
+</pre></td>
+  <td class="code"><pre>{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">posts.comments</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">http://example.com/posts/{post.id}/comments</span><span class="delimiter">&quot;</span></span>
+  },
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: [{
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Rails is Omakase</span><span class="delimiter">&quot;</span></span>
+  }, {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">2</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">The Parley Letter</span><span class="delimiter">&quot;</span></span>
+  }]
+}
+</pre></td>
+</tr></table>
+</div>
+<p>In this example, fetching <code>/posts/1/comments</code> will fetch the comments for <code>&quot;Rails is Omakase&quot;</code> and fetching <code>/posts/2/comments</code> will fetch the comments for <code>&quot;The Parley Letter&quot;</code>.</p>
+<div class="highlight js "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+<strong>10</strong>
+11
+12
+</pre></td>
+  <td class="code"><pre>{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">posts.comments</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">http://example.com/comments/{posts.comments}</span><span class="delimiter">&quot;</span></span>
+  },
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Rails is Omakase</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">comments</span><span class="delimiter">&quot;</span></span>: [ <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">2</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">3</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">4</span><span class="delimiter">&quot;</span></span> ]
+    }
+  }
+}
+</pre></td>
+</tr></table>
+</div>
+<p>In this example, the <code>posts.comments</code> variable is expanded by
+&quot;exploding&quot; the array specified in the <code>&quot;rels&quot;</code> section of each post.
+The <a href="https://tools.ietf.org/html/rfc6570">URL template specification</a> specifies that the default explosion is to join the array members by a comma, so in this example, fetching <code>/comments/1,2,3,4</code> will return a list of all comments.</p>
 
 <p>This example shows how you can start with a list of IDs and then upgrade to specifying a different URL pattern than the default.</p>
 
-<p>The top-level <code>"rels"</code> key has the following behavior:</p>
+<p>The top-level <code>&quot;rels&quot;</code> key has the following behavior:</p>
 
 <ul>
-<li>Each key is a dot-separated path that points at a repeated relationship. For example <code>"posts.comments"</code> points at the <code>"comments"</code> relationship in each repeated document under <code>"posts"</code>.</li>
+<li>Each key is a dot-separated path that points at a repeated relationship. For example <code>&quot;posts.comments&quot;</code> points at the <code>&quot;comments&quot;</code> relationship in each repeated document under <code>&quot;posts&quot;</code>.</li>
 <li>The value of each key is interpreted as a URL template.</li>
 <li>For each document that the path points to, act as if it specified a relationship formed by expanding the URL template with the non-URL value actually specified.</li>
-</ul><p>Here is another example that uses a has-one relationship:</p>
+</ul>
 
-<div class="highlight"><pre><span class="p">{</span>
-  <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
-    <span class="s2">"posts.author"</span><span class="o">:</span> <span class="s2">"http://example.com/people/{posts.author}"</span>
-  <span class="p">},</span>
-  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">[{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span><span class="p">,</span>
-    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
-      <span class="s2">"author"</span><span class="o">:</span> <span class="mi">12</span>
-    <span class="p">}</span>
-  <span class="p">},</span> <span class="p">{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"The Parley Letter"</span><span class="p">,</span>
-    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
-      <span class="s2">"author"</span><span class="o">:</span> <span class="mi">12</span>
-    <span class="p">}</span>
-  <span class="p">},</span> <span class="p">{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">3</span><span class="p">,</span>
-    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Dependency Injection is Not a Virtue"</span><span class="p">,</span>
-    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
-      <span class="s2">"author"</span><span class="o">:</span> <span class="mi">12</span>
-    <span class="p">}</span>
-  <span class="p">}]</span>
-<span class="p">}</span>
-</pre></div>
-
+<p>Here is another example that uses a has-one relationship:</p>
+<div class="highlight js "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+<strong>10</strong>
+11
+12
+13
+14
+15
+16
+17
+18
+19
+<strong>20</strong>
+21
+22
+23
+24
+</pre></td>
+  <td class="code"><pre>{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">posts.author</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">http://example.com/people/{posts.author}</span><span class="delimiter">&quot;</span></span>
+  },
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: [{
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Rails is Omakase</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">author</span><span class="delimiter">&quot;</span></span>: <span class="integer">12</span>
+    }
+  }, {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">2</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">The Parley Letter</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">author</span><span class="delimiter">&quot;</span></span>: <span class="integer">12</span>
+    }
+  }, {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">3</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Dependency Injection is Not a Virtue</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">author</span><span class="delimiter">&quot;</span></span>: <span class="integer">12</span>
+    }
+  }]
+}
+</pre></td>
+</tr></table>
+</div>
 <p>In this example, the author URL for all three posts is <code>/people/12</code>.</p>
 
 <p>Top-level URL templates allow you to specify relationships as IDs, but without requiring that clients hard-code information about how to form the URLs. </p>
-
-<h3>Compound Documents</h3>
-
+<h3 class='anchorable-toc' id='toc_compound-documents'>Compound Documents</h3>
 <p>To save HTTP requests, it may be convenient to send related documents along with the requested documents.</p>
 
 <p>In this case, a bit of extra metadata for each relationship can link together the documents.</p>
-
-<div class="highlight"><pre><span class="p">{</span>
-  <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
-    <span class="s2">"posts.author"</span><span class="o">:</span> <span class="p">{</span>
-      <span class="s2">"url"</span><span class="o">:</span> <span class="s2">"http://example.com/people/{post.author}"</span><span class="p">,</span>
-      <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"people"</span>
-    <span class="p">},</span>
-    <span class="s2">"posts.comments"</span><span class="o">:</span> <span class="p">{</span>
-      <span class="s2">"url"</span><span class="o">:</span> <span class="s2">"http://example.com/comments/{post.comments}"</span><span class="p">,</span>
-      <span class="s2">"type"</span><span class="o">:</span> <span class="s2">"comments"</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-  <span class="s2">"posts"</span><span class="o">:</span> <span class="p">[{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Rails is Omakase"</span><span class="p">,</span>
-    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
-      <span class="s2">"author"</span><span class="o">:</span> <span class="mi">9</span><span class="p">,</span>
-      <span class="s2">"comments"</span><span class="o">:</span> <span class="p">[</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span> <span class="p">]</span>
-   <span class="p">},</span> <span class="p">{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"The Parley Letter"</span><span class="p">,</span>
-    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
-      <span class="s2">"author"</span><span class="o">:</span> <span class="mi">9</span><span class="p">,</span>
-      <span class="s2">"comments"</span><span class="o">:</span> <span class="p">[</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span> <span class="p">]</span>
-   <span class="p">},</span> <span class="p">{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s2">"title"</span><span class="o">:</span> <span class="s2">"Dependency Injection is Not a Virtue"</span><span class="p">,</span>
-    <span class="s2">"rels"</span><span class="o">:</span> <span class="p">{</span>
-      <span class="s2">"author"</span><span class="o">:</span> <span class="mi">9</span><span class="p">,</span>
-      <span class="s2">"comments"</span><span class="o">:</span> <span class="p">[</span> <span class="mi">6</span> <span class="p">]</span>
-    <span class="p">}</span>
-  <span class="p">}],</span>
-  <span class="s2">"people"</span><span class="o">:</span> <span class="p">[{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">9</span><span class="p">,</span>
-    <span class="s2">"name"</span><span class="o">:</span> <span class="s2">"@d2h"</span>
-  <span class="p">}],</span>
-  <span class="s2">"comments"</span><span class="o">:</span> <span class="p">[{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"Mmmmmakase"</span>
-  <span class="p">},</span> <span class="p">{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"I prefer unagi"</span>
-  <span class="p">},</span> <span class="p">{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">3</span><span class="p">,</span>
-    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"What's Omakase?"</span>
-  <span class="p">},</span> <span class="p">{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"Parley is a discussion, especially one between enemies"</span>
-  <span class="p">},</span> <span class="p">{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">5</span><span class="p">,</span>
-    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"The parsley letter"</span>
-  <span class="p">},</span> <span class="p">{</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">6</span><span class="p">,</span>
-    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"Dependency Injection is Not a Vice"</span>
-  <span class="p">}]</span>
-<span class="p">}</span>
-</pre></div>
-
+<div class="highlight js "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+<strong>10</strong>
+11
+12
+13
+14
+15
+16
+17
+18
+19
+<strong>20</strong>
+21
+22
+23
+24
+25
+26
+27
+28
+29
+<strong>30</strong>
+31
+32
+33
+34
+35
+36
+37
+38
+39
+<strong>40</strong>
+41
+42
+43
+44
+45
+46
+47
+48
+49
+<strong>50</strong>
+51
+52
+53
+54
+55
+</pre></td>
+  <td class="code"><pre>{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">posts.author</span><span class="delimiter">&quot;</span></span>: {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">href</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">http://example.com/people/{post.author}</span><span class="delimiter">&quot;</span></span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">type</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">people</span><span class="delimiter">&quot;</span></span>
+    },
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">posts.comments</span><span class="delimiter">&quot;</span></span>: {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">href</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">http://example.com/comments/{post.comments}</span><span class="delimiter">&quot;</span></span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">type</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">comments</span><span class="delimiter">&quot;</span></span>
+    }
+  }
+  <span class="string"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: [{
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Rails is Omakase</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">author</span><span class="delimiter">&quot;</span></span>: <span class="integer">9</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">comments</span><span class="delimiter">&quot;</span></span>: [ <span class="integer">1</span>, <span class="integer">2</span>, <span class="integer">3</span> ]
+   }, {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">2</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">The Parley Letter</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">author</span><span class="delimiter">&quot;</span></span>: <span class="integer">9</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">comments</span><span class="delimiter">&quot;</span></span>: [ <span class="integer">4</span>, <span class="integer">5</span> ]
+   }, {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Dependency Injection is Not a Virtue</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">author</span><span class="delimiter">&quot;</span></span>: <span class="integer">9</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">comments</span><span class="delimiter">&quot;</span></span>: [ <span class="integer">6</span> ]
+    }
+  }],
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">people</span><span class="delimiter">&quot;</span></span>: [{
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">9</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">@d2h</span><span class="delimiter">&quot;</span></span>
+  }],
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">comments</span><span class="delimiter">&quot;</span></span>: [{
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">body</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Mmmmmakase</span><span class="delimiter">&quot;</span></span>
+  }, {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">2</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">body</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">I prefer unagi</span><span class="delimiter">&quot;</span></span>
+  }, {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">3</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">body</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">What's Omakase?</span><span class="delimiter">&quot;</span></span>
+  }, {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">4</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">body</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Parley is a discussion, especially one between enemies</span><span class="delimiter">&quot;</span></span>
+  }, {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">5</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">body</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">The parsley letter</span><span class="delimiter">&quot;</span></span>
+  }, {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">6</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">body</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Dependency Injection is Not a Vice</span><span class="delimiter">&quot;</span></span>
+  }]
+}
+</pre></td>
+</tr></table>
+</div>
 <p>The benefit of this approach is that when the same document is referenced multiple times (in this example, the author of the three posts), it only needs to be presented a single time in the document.</p>
 
 <p>By always combining documents in this way, a client can consistently extract and wire up references.</p>
 
-<p>JSON API documents <strong>MAY</strong> specify the URL for a document in a compound response by specifying a <code>"url"</code> key:</p>
+<p>JSON API documents <strong>MAY</strong> specify the URL for a document in a compound
+response by specifying a <code>&quot;href&quot;</code> key:</p>
+<div class="highlight js "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+<strong>10</strong>
+11
+12
+13
+14
+15
+16
+17
+18
+19
+<strong>20</strong>
+21
+22
+23
+24
+25
+26
+27
+28
+</pre></td>
+  <td class="code"><pre>{
+  <span class="comment">// ...</span>
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">comments</span><span class="delimiter">&quot;</span></span>: [{
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">href</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">http://example.com/comments/1</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">body</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Mmmmmakase</span><span class="delimiter">&quot;</span></span>
+  }, {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">href</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">http://example.com/comments/2</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">2</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">body</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">I prefer unagi</span><span class="delimiter">&quot;</span></span>
+  }, {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">href</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">http://example.com/comments/3</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">3</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">body</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">What's Omakase?</span><span class="delimiter">&quot;</span></span>
+  }, {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">href</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/comments/1</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">4</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">body</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Parley is a discussion, especially one between enemies</span><span class="delimiter">&quot;</span></span>
+  }, {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">href</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/comments/1</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">5</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">body</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">The parsley letter</span><span class="delimiter">&quot;</span></span>
+  }, {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">href</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/comments/1</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">6</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">body</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Dependency Injection is Not a Vice</span><span class="delimiter">&quot;</span></span>
+  }]
+}
+</pre></td>
+</tr></table>
+</div>
+<p>See also <a href="/write">JSON API Updating</a>.</p>
 
-<div class="highlight"><pre><span class="p">{</span>
-  <span class="c1">// ...</span>
-  <span class="s2">"comments"</span><span class="o">:</span> <span class="p">[{</span>
-    <span class="s2">"url"</span><span class="o">:</span> <span class="s2">"http://example.com/comments/1"</span><span class="p">,</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"Mmmmmakase"</span>
-  <span class="p">},</span> <span class="p">{</span>
-    <span class="s2">"url"</span><span class="o">:</span> <span class="s2">"http://example.com/comments/2"</span><span class="p">,</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">2</span><span class="p">,</span>
-    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"I prefer unagi"</span>
-  <span class="p">},</span> <span class="p">{</span>
-    <span class="s2">"url"</span><span class="o">:</span> <span class="s2">"http://example.com/comments/3"</span><span class="p">,</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">3</span><span class="p">,</span>
-    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"What's Omakase?"</span>
-  <span class="p">},</span> <span class="p">{</span>
-    <span class="s2">"url"</span><span class="o">:</span> <span class="s2">"/comments/1"</span><span class="p">,</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">4</span><span class="p">,</span>
-    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"Parley is a discussion, especially one between enemies"</span>
-  <span class="p">},</span> <span class="p">{</span>
-    <span class="s2">"url"</span><span class="o">:</span> <span class="s2">"/comments/1"</span><span class="p">,</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">5</span><span class="p">,</span>
-    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"The parsley letter"</span>
-  <span class="p">},</span> <span class="p">{</span>
-    <span class="s2">"url"</span><span class="o">:</span> <span class="s2">"/comments/1"</span><span class="p">,</span>
-    <span class="s2">"id"</span><span class="o">:</span> <span class="mi">6</span><span class="p">,</span>
-    <span class="s2">"body"</span><span class="o">:</span> <span class="s2">"Dependency Injection is Not a Vice"</span>
-  <span class="p">}]</span>
-<span class="p">}</span>
-</pre></div>
-        </section>
-
-        <footer>
-          JSON API is maintained by <a href="https://github.com/brixen">brixen</a><br>
-          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="http://twitter.com/jasonlong">Jason Long</a>.
-        </footer>
-
-                  <script type="text/javascript">
-            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-          </script>
-          <script type="text/javascript">
-            try {
-              var pageTracker = _gat._getTracker("&lt;script&gt;   (function(i,s,o,g,r,a,m){i[&#39;GoogleAnalyticsObject&#39;]=r;i[r]=i[r]||function(){   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),   m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)   })(window,document,&#39;script&#39;,&#39;//www.google-analytics.com/analytics.js&#39;,&#39;ga&#39;);    ga(&#39;create&#39;, &#39;UA-40609539-1&#39;, &#39;jsonapi.org&#39;);   ga(&#39;send&#39;, &#39;pageview&#39;);  &lt;/script&gt;");
-            pageTracker._trackPageview();
-            } catch(err) {}
-          </script>
-
-      </div>
-    </div>
   </body>
 </html>

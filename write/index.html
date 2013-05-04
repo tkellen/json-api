@@ -1,0 +1,515 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    
+    <!-- Always force latest IE rendering engine or request Chrome Frame -->
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    
+    <!-- Use title if it's in the page YAML frontmatter -->
+    <title>JSON API Updating</title>
+    
+    <link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,600,700,900' rel='stylesheet' type='text/css'>
+    <link href="/stylesheets/normalize.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="/stylesheets/highlight.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="/stylesheets/all.css" media="screen" rel="stylesheet" type="text/css" />
+    <script src="/javascripts/all.js" type="text/javascript"></script>
+  </head>
+  
+  <body class="write write_index">
+    <h1 class='anchorable-toc' id='toc_json-api-updating'>JSON API Updating</h1>
+<p>See also <a href="/">JSON API Reading</a>.</p>
+<h2 class='anchorable-toc' id='toc_urls'>URLs</h2>
+<p>Update URLs are determined <a href="/">the same way</a> as <code>GET</code> URLs. When using the
+ID-based approach, URLs are conventionally formed. When using the
+URL-based approach, every document specifies the URLs for its related
+documents, which can be used to fetch <strong>and</strong> update.</p>
+<h2 class='anchorable-toc' id='toc_creating-a-document'>Creating a Document</h2>
+<p>A JSON API document is <em>created</em> by making a <code>POST</code> request to the URL
+that represents a collection of documents that the new document should
+belong to.</p>
+
+<p>In general, this is a collection scoped to the <strong>type</strong> of document.</p>
+
+<p>The request <strong>MUST</strong> contain a <code>Content-Type</code> header whose value is
+<code>application/json</code>. It <strong>MUST</strong> also include <code>application/json</code> as the
+only or highest quality factor.</p>
+
+<p>Its root key <strong>MUST</strong> be the same as the root key provided in the
+server&#39;s response to <code>GET</code> request for the collection.</p>
+
+<p>For example, assuming the following request for the collection of
+photos:</p>
+<div class="highlight text "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+<strong>10</strong>
+11
+12
+</pre></td>
+  <td class="code"><pre>GET /photos
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  &quot;posts&quot;: [{
+    &quot;id&quot;: 1,
+    &quot;title&quot;: &quot;Mustaches on a Stick&quot;,
+    &quot;src&quot;: &quot;http://example.com/images/mustaches.png&quot;
+  }]
+}
+</pre></td>
+</tr></table>
+</div>
+<p>You would create a new photo by <code>POST</code>ing to the same URL:</p>
+<div class="highlight text "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+<strong>10</strong>
+</pre></td>
+  <td class="code"><pre>POST /photos
+Content-Type: application/json
+Accept: application/json
+
+{
+  &quot;photos&quot;: {
+    &quot;title&quot;: &quot;Ember Hamster&quot;,
+    &quot;src&quot;: &quot;http://example.com/images/productivity.png&quot;
+  }
+}
+</pre></td>
+</tr></table>
+</div><h4 class='anchorable-toc' id='toc_client-side-ids'>Client-Side IDs</h4>
+<p>A server <strong>MAY</strong> require a client to provide IDs generated on the
+client. If a server wants to request client-generated IDs, it <strong>MUST</strong>
+include a <code>meta</code> section in its response with the key <code>client-ids</code> and
+the value <code>true</code>:</p>
+<div class="highlight text "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+<strong>10</strong>
+11
+12
+13
+14
+15
+</pre></td>
+  <td class="code"><pre>GET /photos
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  &quot;posts&quot;: [{
+    &quot;id&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+    &quot;title&quot;: &quot;Mustaches on a Stick&quot;,
+    &quot;href&quot;: &quot;http://example.com/images/mustaches.png&quot;
+  }],
+  &quot;meta&quot;: {
+    &quot;client-ids&quot;: true
+  }
+}
+</pre></td>
+</tr></table>
+</div>
+<p>If the server requests client-generated IDs, the client <strong>MUST</strong> include
+an <code>id</code> key in its <code>POST</code> request, and the value of the <code>id</code> key
+<strong>MUST</strong> be a properly generated and formatted <em>UUID</em> provided as a JSON
+string. </p>
+<div class="highlight text "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+<strong>10</strong>
+11
+</pre></td>
+  <td class="code"><pre>POST /photos
+Content-Type: application/json
+Accept: application/json
+
+{
+  &quot;photos&quot;: {
+    &quot;id&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+    &quot;title&quot;: &quot;Ember Hamster&quot;,
+    &quot;src&quot;: &quot;http://example.com/images/productivity.png&quot;
+  }
+}
+</pre></td>
+</tr></table>
+</div><h4 class='anchorable-toc' id='toc_204-responses'>204 Responses</h4>
+<p>A server <strong>MAY</strong> respond to a <code>POST</code> request with a <code>204 No Content</code>
+response. If it does so, they client <strong>MUST</strong> assume that the server has
+successfully created the document, and accepted all of the attributes as
+is.</p>
+
+<p>Note that if the server is using client-generated IDs, it is possible
+for the client to determine the URL for the newly generated record if
+the collection response included a URL template:</p>
+<div class="highlight text "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+<strong>10</strong>
+11
+12
+13
+14
+15
+16
+17
+18
+</pre></td>
+  <td class="code"><pre>GET /photos
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  &quot;posts&quot;: [{
+    &quot;id&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+    &quot;title&quot;: &quot;Mustaches on a Stick&quot;,
+    &quot;href&quot;: &quot;http://example.com/images/mustaches.png&quot;
+  }],
+  &quot;rels&quot;: {
+    &quot;posts&quot;: &quot;http://example.com/posts/{posts.id}&quot;
+  },
+  &quot;meta&quot;: {
+    &quot;client-ids&quot;: true
+  }
+}
+</pre></td>
+</tr></table>
+</div>
+<p>If the client generated a UUID of
+&quot;550e8400-e29b-41d4-a716-446655440001&quot;, and it receives a 204 response,
+it knows that the URL for the newly created document is
+<code>http://example.com/posts/550e8400-e29b-41d4-a716-446655440001</code>.</p>
+<h4 class='anchorable-toc' id='toc_200-responses'>200 Responses</h4>
+<p>A server <strong>MAY</strong> respond to a <code>POST</code> request with a <code>200 OK</code> response.
+If it does so, it <strong>MUST</strong> include a response body that is a valid
+response to a JSON API <code>GET</code> request.</p>
+
+<p>If the server is using the URL-based JSON API, it <strong>MUST</strong> include a
+<code>href</code> key in the attributes section that is the server location of the
+newly created document.</p>
+<div class="highlight text "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+<strong>10</strong>
+11
+</pre></td>
+  <td class="code"><pre>HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  &quot;posts&quot;: {
+    &quot;id&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+    &quot;href&quot;: &quot;http://example.com/photos/12&quot;,
+    &quot;title&quot;: &quot;Ember Hamster&quot;,
+    &quot;src&quot;: &quot;http://example.com/images/productivity.png&quot;
+  }
+}
+</pre></td>
+</tr></table>
+</div><h4 class='anchorable-toc' id='toc_other-responses'>Other Responses</h4>
+<p>Servers <strong>MAY</strong> use other HTTP error codes to represent errors.  Clients
+<strong>MUST</strong> interpret those errors in accordance with HTTP semantics.</p>
+<h2 class='anchorable-toc' id='toc_updating-a-document-code-patch-code'>Updating a Document (<code>PATCH</code>)</h2>
+<p>The body of the <code>PATCH</code> request <strong>MUST</strong> be in JSON format with a <code>Content-Type</code>
+header of <code>application/json-patch</code>.</p>
+
+<p>It <strong>MUST</strong> be a valid <a href="http://tools.ietf.org/html/draft-ietf-appsawg-json-patch-03">JSON Patch</a> document.</p>
+<h3 class='anchorable-toc' id='toc_attributes'>Attributes</h3>
+<p>To update an attribute, include a <code>replace</code> operation in the JSON Patch
+document. The name of the property to replace <strong>MUST</strong> be the same as
+the attribute name in the original <code>GET</code> request.</p>
+
+<p>For example, consider this <code>GET</code> request:</p>
+<div class="highlight text "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+<strong>10</strong>
+11
+12
+</pre></td>
+  <td class="code"><pre>GET /photos/1
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  &quot;photos&quot;: {
+    &quot;id&quot;: 1,
+    &quot;title&quot;: &quot;Productivity&quot;,
+    &quot;src&quot;: &quot;http://example.com/productivity.png&quot;
+  }
+}
+</pre></td>
+</tr></table>
+</div>
+<p>To update just the <code>src</code> property of the photo at <code>/photos/1</code>, make the
+following request:</p>
+<div class="highlight text "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+</pre></td>
+  <td class="code"><pre>PATCH /photos/1
+Content-Type: application/json-patch
+
+[
+  { &quot;replace&quot;: &quot;src&quot;, value: &quot;http://example.com/hamster.png&quot; }
+]
+</pre></td>
+</tr></table>
+</div>
+<p>For attributes, only the <code>replace</code> operation is supported at the current
+time.</p>
+<h3 class='anchorable-toc' id='toc_relationships'>Relationships</h3>
+<p>Relationship updates are represented as JSON Patch operations on the
+<code>rels</code> document.</p>
+<h4 class='anchorable-toc' id='toc_to-one-relationships'>To-One Relationships</h4>
+<p>To update a to-one relationship, the client <strong>MUST</strong> issue a <code>PATCH</code>
+request that includes a <code>replace</code> operation on the relationship
+<code>rels/&lt;name&gt;</code>.</p>
+
+<p>For example, for the following <code>GET</code> request:</p>
+<div class="highlight text "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+<strong>10</strong>
+11
+12
+13
+14
+15
+16
+17
+</pre></td>
+  <td class="code"><pre>GET /photos/1
+Content-Type: application/json
+
+{
+  &quot;rels&quot;: {
+    &quot;photos.author&quot;: &quot;http://example.com/people/{photos.author}&quot;
+  },
+  &quot;photos&quot;: {
+    &quot;id&quot;: 1,
+    &quot;href&quot;: &quot;http://example.com/photos/1&quot;,
+    &quot;title&quot;: &quot;Hamster&quot;,
+    &quot;src&quot;: &quot;images/hamster.png&quot;,
+    &quot;rels&quot;: {
+      &quot;author&quot;: 1
+    }
+  }
+}
+</pre></td>
+</tr></table>
+</div>
+<p>To change the author to person 2, issue a <code>PATCH</code> request to
+<code>/photos/1</code>:</p>
+<div class="highlight text "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+</pre></td>
+  <td class="code"><pre>PATCH /photos/1
+Content-Type: application/json-patch
+Accept: application/json
+
+[
+  { &quot;replace&quot;: &quot;rels/author&quot;, value: 2 }
+]
+</pre></td>
+</tr></table>
+</div><h4 class='anchorable-toc' id='toc_to-many-relationships'>To-Many Relationships</h4>
+<p>While to-many relationships are represented as a JSON array in a <code>GET</code>
+response, they are updated as if they were a set.</p>
+
+<p>To remove an element from a to-many relationship, use a <code>remove</code>
+operation on <code>rels/&lt;name&gt;/&lt;id&gt;</code>. To add an element, use an <code>add</code>
+operation on <code>rels/&lt;name&gt;/-</code>.</p>
+
+<p>For example, for the following <code>GET</code> request:</p>
+<div class="highlight text "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+<strong>10</strong>
+11
+12
+13
+14
+15
+16
+17
+</pre></td>
+  <td class="code"><pre>GET /photos/1
+Content-Type: application/json
+
+{
+  &quot;rels&quot;: {
+    &quot;photos.author&quot;: &quot;http://example.com/people/{photos.author}&quot;
+  },
+  &quot;photos&quot;: {
+    &quot;id&quot;: 1,
+    [[]] &quot;http://example.com/photos/1&quot;,
+    &quot;title&quot;: &quot;Hamster&quot;,
+    &quot;src&quot;: &quot;images/hamster.png&quot;,
+    &quot;rels&quot;: {
+      &quot;comments&quot;: [ 1, 5, 12, 17 ]
+    }
+  }
+}
+</pre></td>
+</tr></table>
+</div>
+<p>You could move comment 30 to this photo by issuing an <code>add</code> operation in
+the <code>PATCH</code> request:</p>
+<div class="highlight text "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+</pre></td>
+  <td class="code"><pre>PATCH /photos/1
+
+[
+  { &quot;add&quot;: &quot;rels/comments/-&quot;, &quot;value&quot;: 30 }
+]
+</pre></td>
+</tr></table>
+</div>
+<p>To remove comment 5 from this photo, issue a <code>remove</code> operation:</p>
+<div class="highlight text "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+</pre></td>
+  <td class="code"><pre>PATCH /photos/1
+
+[
+  { &quot;remove&quot;: &quot;rels/comments/5&quot; }
+]
+</pre></td>
+</tr></table>
+</div>
+<p>Note that to-many relationships have set-like behavior in JSON API to
+limit the damage that can be caused by concurrent modifications.</p>
+<h3 class='anchorable-toc' id='toc_204-no-content'>204 No Content</h3>
+<p>If a server returns a <code>204 No Content</code> in response to a <code>PATCH</code> request,
+it means that the update was successful, and that the client&#39;s current
+attributes remain up to date.</p>
+<h3 class='anchorable-toc' id='toc_200-ok'>200 OK</h3>
+<p>If the server accepts the updated but also changes the document in other
+ways than those specified by the <code>PATCH</code> request (for example, updating
+the <code>updatedAt</code> attribute or a computed <code>sha</code>), it <strong>MUST</strong> return a
+<code>200 OK</code> response.</p>
+
+<p>The body of the response <strong>MUST</strong> be a valid JSON API response, as if a
+<code>GET</code> request was made to the same URL.</p>
+<h3 class='anchorable-toc' id='toc_other-responses'>Other Responses</h3>
+<p>Servers <strong>MAY</strong> use other HTTP error codes to represent errors.  Clients
+<strong>MUST</strong> interpret those errors in accordance with HTTP semantics.</p>
+<h2 class='anchorable-toc' id='toc_deletions'>Deletions</h2>
+<p>A JSON API document is <em>deleted</em> by making a <code>DELETE</code> request to the
+document&#39;s URL.</p>
+
+<p>It <strong>MUST</strong> contain an <code>Accept</code> header with <code>application/json</code> as
+the only or highest quality factor.</p>
+<div class="highlight text "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+</pre></td>
+  <td class="code"><pre>DELETE /photos/1
+</pre></td>
+</tr></table>
+</div><h3 class='anchorable-toc' id='toc_204-responses'>204 Responses</h3>
+<p>If a server returns a <code>204 No Content</code> in response to a <code>DELETE</code>
+request, it means that the deletion was successful.</p>
+<h3 class='anchorable-toc' id='toc_other-responses'>Other Responses</h3>
+<p>Servers <strong>MAY</strong> use other HTTP error codes to represent errors.  Clients
+<strong>MUST</strong> interpret those errors in accordance with HTTP semantics.</p>
+<h2 class='anchorable-toc' id='toc_http-caching'>HTTP Caching</h2>
+<p>Servers <strong>MAY</strong> use HTTP caching headers (<code>ETag</code>, <code>Last-Modified</code>) in
+accordance with the semantics described in HTTP 1.1.</p>
+<h2 class='anchorable-toc' id='toc_compound-responses'>Compound Responses</h2>
+<p>Whenever a server returns a <code>200 OK</code> response in response to a creation,
+update or deletion, it <strong>MAY</strong> include other documents in the JSON
+document. The semantics of these documents are <a href="/">the same</a> as when
+additional documents are included in response to a <code>GET</code>.</p>
+
+<p>See also <a href="/">JSON API Reading</a>.</p>
+
+  </body>
+</html>
