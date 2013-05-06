@@ -65,7 +65,7 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  &quot;posts&quot;: [{
+  &quot;photos&quot;: [{
     &quot;id&quot;: 1,
     &quot;title&quot;: &quot;Mustaches on a Stick&quot;,
     &quot;src&quot;: &quot;http://example.com/images/mustaches.png&quot;
@@ -264,7 +264,7 @@ Content-Type: application/json
 <p>The body of the <code>PATCH</code> request <strong>MUST</strong> be in JSON format with a <code>Content-Type</code>
 header of <code>application/json-patch</code>.</p>
 
-<p>It <strong>MUST</strong> be a valid <a href="http://tools.ietf.org/html/draft-ietf-appsawg-json-patch-03">JSON Patch</a> document.</p>
+<p>It <strong>MUST</strong> be a valid <a href="http://tools.ietf.org/html/rfc6902">JSON Patch (RFC 6902)</a> document.</p>
 <h3 class='anchorable-toc' id='toc_attributes'>Attributes</h3>
 <p>To update an attribute, include a <code>replace</code> operation in the JSON Patch
 document. The name of the property to replace <strong>MUST</strong> be the same as
@@ -314,7 +314,7 @@ following request:</p>
 Content-Type: application/json-patch
 
 [
-  { &quot;replace&quot;: &quot;src&quot;, &quot;value&quot;: &quot;http://example.com/hamster.png&quot; }
+  { &quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/src&quot;, &quot;value&quot;: &quot;http://example.com/hamster.png&quot; }
 ]
 </pre></td>
 </tr></table>
@@ -385,7 +385,7 @@ Content-Type: application/json-patch
 Accept: application/json
 
 [
-  { &quot;replace&quot;: &quot;rels/author&quot;, &quot;value&quot;: 2 }
+  { &quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/rels/author&quot;, &quot;value&quot;: 2 }
 ]
 </pre></td>
 </tr></table>
@@ -449,7 +449,7 @@ the <code>PATCH</code> request:</p>
   <td class="code"><pre>PATCH /photos/1
 
 [
-  { &quot;add&quot;: &quot;rels/comments/-&quot;, &quot;value&quot;: 30 }
+  { &quot;op&quot;: &quot;add&quot;, &quot;path&quot;: &quot;/rels/comments/-&quot;, &quot;value&quot;: 30 }
 ]
 </pre></td>
 </tr></table>
