@@ -1,0 +1,144 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    
+    <!-- Always force latest IE rendering engine or request Chrome Frame -->
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    
+    <!-- Use title if it's in the page YAML frontmatter -->
+    <title>JSON API: Extending</title>
+    
+    <link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,600,700,900' rel='stylesheet' type='text/css'>
+    <link href="/stylesheets/normalize.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="/stylesheets/highlight.css" media="screen" rel="stylesheet" type="text/css" />
+<link href="/stylesheets/all.css" media="screen" rel="stylesheet" type="text/css" />
+    <script src="/javascripts/all.js" type="text/javascript"></script>
+  </head>
+  
+  <body class="extending extending_index">
+    <h1 class='anchorable-toc' id='toc_json-api-extending'>JSON API: Extending</h1>
+<p>See also </p>
+
+<ul>
+<li><a href="/">Reading</a></li>
+<li><a href="/write">Writing</a></li>
+<li><a href="/extending">Extending</a></li>
+<li><a href="/history">History</a></li>
+</ul>
+<h2 class='anchorable-toc' id='toc_note'>NOTE</h2>
+<p><em>This document is a work in progress, and will likely change over the
+next month as implementation work progresses. It is currently missing
+some details about the <code>meta</code> attribute and could be more precise about
+details of working with relationships.</em></p>
+
+<p><em>Please feel free to help flesh it out or if you try to write an
+implementation, tell us where things were ambiguous.</em></p>
+
+<p><em>You can do so by filing an Issue against <a href="https://github.com/json-api/json-api/issues">our GitHub
+repository.</a></em></p>
+<h2 class='anchorable-toc' id='toc_extending'>Extending</h2>
+<p>If you would like to extend JSON API, you may do so with the profile link
+relation, defined in <a href="http://tools.ietf.org/html/rfc6906">RFC 6906</a>. See also
+<a href="http://www.mnot.net/blog/2012/04/17/profiles">this blog post by Mark
+Nottingham</a>.</p>
+
+<p>The <code>meta</code> key is where this profile link SHOULD go.</p>
+
+<p>Note that according to the RFC, profiles are</p>
+<div class="highlight  "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+</pre></td>
+  <td class="code"><pre>defined not to alter the semantics of the resource representation itself, but
+to allow clients to learn about additional semantics (constraints, conventions,
+extensions) that are associated with the resource representation, in addition
+to those defined by the media type and possibly other mechanisms.
+</pre></td>
+</tr></table>
+</div><h2 class='anchorable-toc' id='toc_examples'>Examples</h2>
+<p>For example, let&#39;s say that you want your API to support a different pagination
+scheme, such as one based on cursors. You would make some sort of profile page
+on your site, such as <code>http://api.example.com/profile</code>, and then include it
+in the <code>meta</code> key of your responses:</p>
+<div class="highlight text "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+<strong>10</strong>
+11
+</pre></td>
+  <td class="code"><pre>GET http://api.example.com/
+
+{
+  &quot;meta&quot;: {
+    &quot;profile&quot;: &quot;http://api.example.com/profile&quot;
+  },
+
+  &quot;posts&quot;: {
+    // an individual post document
+  }
+}
+</pre></td>
+</tr></table>
+</div>
+<p>That document will de-reference to explain your link relations:</p>
+<div class="highlight text "><div class="ribbon"></div><table class="CodeRay"><tr>
+  <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+<strong>10</strong>
+11
+12
+13
+14
+15
+16
+17
+18
+19
+<strong>20</strong>
+21
+22
+</pre></td>
+  <td class="code"><pre>GET http://api.example.com/profile
+
+200 OK
+Content-Type: text/plain
+
+The Example.com API Profile
+===========================
+
+The Example.com API uses cursor-based pagination. Here's how it works: in the
+`meta` section of responses, it will return a `cursors` relation, with
+`after`, `before`, and `limit` relations that describe the cursors. You can use
+these with the URI template given in the `href` relation to generate the URIs
+you need to paginate.
+
+&quot;meta&quot;: {
+  &quot;cursors&quot;: {
+    &quot;after&quot;: &quot;abcd1234&quot;,
+    &quot;before&quot;: &quot;wxyz0987&quot;,
+    &quot;limit&quot;: 25
+    &quot;href&quot;: &quot;https://api.example.com/whatever{?after,before,limit}&quot;
+  }
+}
+</pre></td>
+</tr></table>
+</div>
+  </body>
+</html>
