@@ -25,18 +25,22 @@
 <li><a href="/extending">Extending</a></li>
 <li><a href="/history">History</a></li>
 </ul>
-<h2 class='anchorable-toc' id='toc_note'>NOTE</h2>
-<p><em>This document is a work in progress, and will likely change over the
-next month as implementation work progresses. It is currently missing
+<h2 class='anchorable-toc' id='toc_status'>Status</h2>
+<p><strong>This document is a work in progress</strong> and will likely change over the
+next month as implementation work progresses. Implementors should be
+aware that this specification is not stable. It is currently missing
 some details about the <code>meta</code> attribute and could be more precise about
-details of working with relationships.</em></p>
+details of working with relationships.</p>
 
-<p><em>Please feel free to help flesh it out or if you try to write an
-implementation, tell us where things were ambiguous.</em></p>
-
-<p><em>You can do so by filing an Issue against <a href="https://github.com/json-api/json-api/issues">our GitHub
-repository.</a></em></p>
+<p>Work on this specification is being done at its 
+<a href="https://github.com/json-api/json-api">GitHub repository</a>. Please feel 
+free to help flesh it out or, if you try to write an implementation, to 
+tell us where things were ambiguous. The best way to do so is to 
+<a href="https://github.com/json-api/json-api/issues">file an Issue</a>.</p>
 <h2 class='anchorable-toc' id='toc_abstract'>Abstract</h2>
+<p>This document describes the &#39;application/vnd.api+json&#39; media type. It is
+currently going through the process of being registered with IANA.</p>
+
 <p>There are two JSON API styles:</p>
 
 <ul>
@@ -419,7 +423,7 @@ attributes section and should not be used as attribute names.</p>
 </pre></td>
 </tr></table>
 </div>
-<p>An API that provides a to-one relationship as an ID <strong>MUST</strong> respond to a <code>GET</code> request with the specified document with the specified URL.</p>
+<p>An API that provides a to-one relationship as a URL <strong>MUST</strong> respond to a <code>GET</code> request with the specified document with the specified URL.</p>
 
 <p>In the above example, a <code>GET</code> request to <code>/people/17</code> returns a document containing the specified author.</p>
 <h3 class='anchorable-toc' id='toc_url-template-shorthands'>URL Template Shorthands</h3>
