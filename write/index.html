@@ -70,7 +70,7 @@ Content-Type: application/json
 
 {
   &quot;photos&quot;: [{
-    &quot;id&quot;: 1,
+    &quot;id&quot;: &quot;1&quot;,
     &quot;title&quot;: &quot;Mustaches on a Stick&quot;,
     &quot;src&quot;: &quot;http://example.com/images/mustaches.png&quot;
   }]
@@ -200,7 +200,6 @@ the collection response included a URL template:</p>
 15
 16
 17
-18
 </pre></td>
   <td class="code"><pre>GET /photos
 
@@ -210,8 +209,7 @@ Content-Type: application/json
 {
   &quot;posts&quot;: [{
     &quot;id&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
-    &quot;title&quot;: &quot;Mustaches on a Stick&quot;,
-    &quot;href&quot;: &quot;http://example.com/images/mustaches.png&quot;
+    &quot;title&quot;: &quot;Mustaches on a Stick&quot;
   }],
   &quot;links&quot;: {
     &quot;posts&quot;: &quot;http://example.com/posts/{posts.id}&quot;
@@ -252,7 +250,7 @@ newly created document.</p>
 Content-Type: application/json
 
 {
-  &quot;posts&quot;: {
+  &quot;photos&quot;: {
     &quot;id&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
     &quot;href&quot;: &quot;http://example.com/photos/12&quot;,
     &quot;title&quot;: &quot;Ember Hamster&quot;,
@@ -296,7 +294,7 @@ Content-Type: application/json
 
 {
   &quot;photos&quot;: {
-    &quot;id&quot;: 1,
+    &quot;id&quot;: &quot;1&quot;,
     &quot;title&quot;: &quot;Productivity&quot;,
     &quot;src&quot;: &quot;http://example.com/productivity.png&quot;
   }
@@ -361,12 +359,12 @@ Content-Type: application/json
     &quot;photos.author&quot;: &quot;http://example.com/people/{photos.author}&quot;
   },
   &quot;photos&quot;: {
-    &quot;id&quot;: 1,
+    &quot;id&quot;: &quot;1&quot;,
     &quot;href&quot;: &quot;http://example.com/photos/1&quot;,
     &quot;title&quot;: &quot;Hamster&quot;,
     &quot;src&quot;: &quot;images/hamster.png&quot;,
     &quot;links&quot;: {
-      &quot;author&quot;: 1
+      &quot;author&quot;: &quot;1&quot;
     }
   }
 }
@@ -429,12 +427,12 @@ Content-Type: application/json
     &quot;photos.author&quot;: &quot;http://example.com/people/{photos.author}&quot;
   },
   &quot;photos&quot;: {
-    &quot;id&quot;: 1,
+    &quot;id&quot;: &quot;1&quot;,
     &quot;href&quot;: &quot;http://example.com/photos/1&quot;,
     &quot;title&quot;: &quot;Hamster&quot;,
     &quot;src&quot;: &quot;images/hamster.png&quot;,
     &quot;links&quot;: {
-      &quot;comments&quot;: [ 1, 5, 12, 17 ]
+      &quot;comments&quot;: [ &quot;1&quot;, &quot;5&quot;, &quot;12&quot;, &quot;17&quot; ]
     }
   }
 }
