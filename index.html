@@ -70,7 +70,7 @@ URLs used for a resource.</p>
 <ul>
 <li><code>id</code></li>
 <li><code>href</code></li>
-<li><code>rels</code></li>
+<li><code>links</code></li>
 </ul>
 
 <p>Each of these names has a special meaning when included in the
@@ -125,7 +125,7 @@ attributes section and should not be used as attribute names.</p>
 <h3 class='anchorable-toc' id='toc_ids'>IDs</h3>
 <p>The <code>&quot;id&quot;</code> key in a document represents a unique identifier for the document, scoped to the document&#39;s type. The type scope is implicit, and hardcoded into clients of the API.</p>
 <h3 class='anchorable-toc' id='toc_attributes'>Attributes</h3>
-<p>Other than the <code>&quot;rels&quot;</code> and <code>&quot;id&quot;</code> keys, every key in a document represents an attribute. An attribute&#39;s value may be any JSON value.</p>
+<p>Other than the <code>&quot;links&quot;</code> and <code>&quot;id&quot;</code> keys, every key in a document represents an attribute. An attribute&#39;s value may be any JSON value.</p>
 <div class="highlight js "><div class="ribbon"></div><table class="CodeRay"><tr>
   <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
 2
@@ -143,7 +143,7 @@ attributes section and should not be used as attribute names.</p>
 </pre></td>
 </tr></table>
 </div><h3 class='anchorable-toc' id='toc_relationships'>Relationships</h3>
-<p>The value of the <code>&quot;rels&quot;</code> key is a JSON object that represents related documents.</p>
+<p>The value of the <code>&quot;links&quot;</code> key is a JSON object that represents related documents.</p>
 <div class="highlight js "><div class="ribbon"></div><table class="CodeRay"><tr>
   <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
 2
@@ -160,7 +160,7 @@ attributes section and should not be used as attribute names.</p>
   <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: {
     <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Rails is Omakase</span><span class="delimiter">&quot;</span></span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">links</span><span class="delimiter">&quot;</span></span>: {
       <span class="key"><span class="delimiter">&quot;</span><span class="content">author</span><span class="delimiter">&quot;</span></span>: <span class="integer">9</span>,
       <span class="key"><span class="delimiter">&quot;</span><span class="content">comments</span><span class="delimiter">&quot;</span></span>: [ <span class="integer">5</span>, <span class="integer">12</span>, <span class="integer">17</span>, <span class="integer">20</span> ]
     }
@@ -185,7 +185,7 @@ attributes section and should not be used as attribute names.</p>
   <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: {
     <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Rails is Omakase</span><span class="delimiter">&quot;</span></span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">links</span><span class="delimiter">&quot;</span></span>: {
       <span class="key"><span class="delimiter">&quot;</span><span class="content">comments</span><span class="delimiter">&quot;</span></span>: [ <span class="integer">5</span>, <span class="integer">12</span>, <span class="integer">17</span>, <span class="integer">20</span> ]
     }
   }
@@ -219,7 +219,7 @@ attributes section and should not be used as attribute names.</p>
   <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: {
     <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Rails is Omakase</span><span class="delimiter">&quot;</span></span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">links</span><span class="delimiter">&quot;</span></span>: {
       <span class="key"><span class="delimiter">&quot;</span><span class="content">author</span><span class="delimiter">&quot;</span></span>: <span class="integer">17</span>
     }
   }
@@ -257,7 +257,7 @@ attributes section and should not be used as attribute names.</p>
   <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: {
     <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Rails is Omakase</span><span class="delimiter">&quot;</span></span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">links</span><span class="delimiter">&quot;</span></span>: {
       <span class="key"><span class="delimiter">&quot;</span><span class="content">author</span><span class="delimiter">&quot;</span></span>: <span class="integer">9</span>
     }
   },
@@ -271,7 +271,7 @@ attributes section and should not be used as attribute names.</p>
 </div>
 <p>The related documents are provided as an additional top-level document or document list whose key is a name that represents the document type.</p>
 
-<p>The linkage between the key under <code>&quot;rels&quot;</code> and the top-level keys is hardcoded into the client.</p>
+<p>The linkage between the key under <code>&quot;links&quot;</code> and the top-level keys is hardcoded into the client.</p>
 <h2 class='anchorable-toc' id='toc_url-based-json-api'>URL-Based JSON API</h2>
 <p>In the above description of ID-based JSON, there were several places where information about the location of related resources needed to be hardcoded into the client.</p>
 
@@ -281,7 +281,7 @@ attributes section and should not be used as attribute names.</p>
 
 <ul>
 <li><code>meta</code>: meta-information about a resource, such as pagination</li>
-<li><code>rels</code>: in compound resources, information about relationships that would otherwise need to be repeated</li>
+<li><code>links</code>: in compound resources, information about relationships that would otherwise need to be repeated</li>
 <li>Other resource names (<code>posts</code>, <code>comments</code>, <code>people</code>, etc.) </li>
 </ul>
 <h3 class='anchorable-toc' id='toc_singular-resources'>Singular Resources</h3>
@@ -327,7 +327,7 @@ attributes section and should not be used as attribute names.</p>
 <h3 class='anchorable-toc' id='toc_ids'>IDs</h3>
 <p>The <code>&quot;id&quot;</code> key in a document represents a unique identifier for the document, scoped to the document&#39;s type. It can be used with URL templates to fetch related records, as described below.</p>
 <h3 class='anchorable-toc' id='toc_attributes'>Attributes</h3>
-<p>Other than the <code>&quot;rels&quot;</code> and <code>&quot;id&quot;</code> keys, every key in a document represents an attribute. An attribute&#39;s value may be any JSON value.</p>
+<p>Other than the <code>&quot;links&quot;</code> and <code>&quot;id&quot;</code> keys, every key in a document represents an attribute. An attribute&#39;s value may be any JSON value.</p>
 <div class="highlight js "><div class="ribbon"></div><table class="CodeRay"><tr>
   <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
 2
@@ -345,7 +345,7 @@ attributes section and should not be used as attribute names.</p>
 </pre></td>
 </tr></table>
 </div><h3 class='anchorable-toc' id='toc_relationships'>Relationships</h3>
-<p>The value of the <code>&quot;rels&quot;</code> key is a JSON object that represents related documents.</p>
+<p>The value of the <code>&quot;links&quot;</code> key is a JSON object that represents related documents.</p>
 <div class="highlight js "><div class="ribbon"></div><table class="CodeRay"><tr>
   <td class="line-numbers" title="double click to toggle" ondblclick="with (this.firstChild.style) { display = (display == '') ? 'none' : '' }"><pre>1
 2
@@ -362,7 +362,7 @@ attributes section and should not be used as attribute names.</p>
   <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: {
     <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Rails is Omakase</span><span class="delimiter">&quot;</span></span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">links</span><span class="delimiter">&quot;</span></span>: {
       <span class="key"><span class="delimiter">&quot;</span><span class="content">author</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">http://example.com/people/1</span><span class="delimiter">&quot;</span></span>,
       <span class="key"><span class="delimiter">&quot;</span><span class="content">comments</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">http://example.com/comments/5,12,17,20</span><span class="delimiter">&quot;</span></span>
     }
@@ -387,7 +387,7 @@ attributes section and should not be used as attribute names.</p>
   <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: {
     <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Rails is Omakase</span><span class="delimiter">&quot;</span></span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">links</span><span class="delimiter">&quot;</span></span>: {
       <span class="key"><span class="delimiter">&quot;</span><span class="content">comments</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">http://example.com/posts/1/comments</span><span class="delimiter">&quot;</span></span>
     }
   }
@@ -415,7 +415,7 @@ attributes section and should not be used as attribute names.</p>
   <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: {
     <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Rails is Omakase</span><span class="delimiter">&quot;</span></span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">links</span><span class="delimiter">&quot;</span></span>: {
       <span class="key"><span class="delimiter">&quot;</span><span class="content">author</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">http://example.com/people/17</span><span class="delimiter">&quot;</span></span>
     }
   }
@@ -427,7 +427,7 @@ attributes section and should not be used as attribute names.</p>
 
 <p>In the above example, a <code>GET</code> request to <code>/people/17</code> returns a document containing the specified author.</p>
 <h3 class='anchorable-toc' id='toc_url-template-shorthands'>URL Template Shorthands</h3>
-<p>When returning a list of documents from a response, a top-level <code>&quot;rels&quot;</code> object can specify a URL template that should be used for all documents.</p>
+<p>When returning a list of documents from a response, a top-level <code>&quot;links&quot;</code> object can specify a URL template that should be used for all documents.</p>
 
 <p>Example:</p>
 <div class="highlight js "><div class="ribbon"></div><table class="CodeRay"><tr>
@@ -445,7 +445,7 @@ attributes section and should not be used as attribute names.</p>
 12
 </pre></td>
   <td class="code"><pre>{
-  <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">links</span><span class="delimiter">&quot;</span></span>: {
     <span class="key"><span class="delimiter">&quot;</span><span class="content">posts.comments</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">http://example.com/posts/{post.id}/comments</span><span class="delimiter">&quot;</span></span>
   },
   <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: [{
@@ -475,13 +475,13 @@ attributes section and should not be used as attribute names.</p>
 12
 </pre></td>
   <td class="code"><pre>{
-  <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">links</span><span class="delimiter">&quot;</span></span>: {
     <span class="key"><span class="delimiter">&quot;</span><span class="content">posts.comments</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">http://example.com/comments/{posts.comments}</span><span class="delimiter">&quot;</span></span>
   },
   <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: {
     <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Rails is Omakase</span><span class="delimiter">&quot;</span></span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">links</span><span class="delimiter">&quot;</span></span>: {
       <span class="key"><span class="delimiter">&quot;</span><span class="content">comments</span><span class="delimiter">&quot;</span></span>: [ <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">2</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">3</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">4</span><span class="delimiter">&quot;</span></span> ]
     }
   }
@@ -490,12 +490,12 @@ attributes section and should not be used as attribute names.</p>
 </tr></table>
 </div>
 <p>In this example, the <code>posts.comments</code> variable is expanded by
-&quot;exploding&quot; the array specified in the <code>&quot;rels&quot;</code> section of each post.
+&quot;exploding&quot; the array specified in the <code>&quot;links&quot;</code> section of each post.
 The <a href="https://tools.ietf.org/html/rfc6570">URL template specification</a> specifies that the default explosion is to join the array members by a comma, so in this example, fetching <code>/comments/1,2,3,4</code> will return a list of all comments.</p>
 
 <p>This example shows how you can start with a list of IDs and then upgrade to specifying a different URL pattern than the default.</p>
 
-<p>The top-level <code>&quot;rels&quot;</code> key has the following behavior:</p>
+<p>The top-level <code>&quot;links&quot;</code> key has the following behavior:</p>
 
 <ul>
 <li>Each key is a dot-separated path that points at a repeated relationship. For example <code>&quot;posts.comments&quot;</code> points at the <code>&quot;comments&quot;</code> relationship in each repeated document under <code>&quot;posts&quot;</code>.</li>
@@ -531,25 +531,25 @@ The <a href="https://tools.ietf.org/html/rfc6570">URL template specification</a>
 24
 </pre></td>
   <td class="code"><pre>{
-  <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">links</span><span class="delimiter">&quot;</span></span>: {
     <span class="key"><span class="delimiter">&quot;</span><span class="content">posts.author</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">http://example.com/people/{posts.author}</span><span class="delimiter">&quot;</span></span>
   },
   <span class="key"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: [{
     <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Rails is Omakase</span><span class="delimiter">&quot;</span></span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">links</span><span class="delimiter">&quot;</span></span>: {
       <span class="key"><span class="delimiter">&quot;</span><span class="content">author</span><span class="delimiter">&quot;</span></span>: <span class="integer">12</span>
     }
   }, {
     <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">2</span><span class="delimiter">&quot;</span></span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">The Parley Letter</span><span class="delimiter">&quot;</span></span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">links</span><span class="delimiter">&quot;</span></span>: {
       <span class="key"><span class="delimiter">&quot;</span><span class="content">author</span><span class="delimiter">&quot;</span></span>: <span class="integer">12</span>
     }
   }, {
     <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">3</span><span class="delimiter">&quot;</span></span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Dependency Injection is Not a Virtue</span><span class="delimiter">&quot;</span></span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">links</span><span class="delimiter">&quot;</span></span>: {
       <span class="key"><span class="delimiter">&quot;</span><span class="content">author</span><span class="delimiter">&quot;</span></span>: <span class="integer">12</span>
     }
   }]
@@ -622,7 +622,7 @@ The <a href="https://tools.ietf.org/html/rfc6570">URL template specification</a>
 55
 </pre></td>
   <td class="code"><pre>{
-  <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">links</span><span class="delimiter">&quot;</span></span>: {
     <span class="key"><span class="delimiter">&quot;</span><span class="content">posts.author</span><span class="delimiter">&quot;</span></span>: {
       <span class="key"><span class="delimiter">&quot;</span><span class="content">href</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">http://example.com/people/{post.author}</span><span class="delimiter">&quot;</span></span>,
       <span class="key"><span class="delimiter">&quot;</span><span class="content">type</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">people</span><span class="delimiter">&quot;</span></span>
@@ -635,19 +635,19 @@ The <a href="https://tools.ietf.org/html/rfc6570">URL template specification</a>
   <span class="string"><span class="delimiter">&quot;</span><span class="content">posts</span><span class="delimiter">&quot;</span></span>: [{
     <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Rails is Omakase</span><span class="delimiter">&quot;</span></span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">links</span><span class="delimiter">&quot;</span></span>: {
       <span class="key"><span class="delimiter">&quot;</span><span class="content">author</span><span class="delimiter">&quot;</span></span>: <span class="integer">9</span>,
       <span class="key"><span class="delimiter">&quot;</span><span class="content">comments</span><span class="delimiter">&quot;</span></span>: [ <span class="integer">1</span>, <span class="integer">2</span>, <span class="integer">3</span> ]
    }, {
     <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">2</span><span class="delimiter">&quot;</span></span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">The Parley Letter</span><span class="delimiter">&quot;</span></span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">links</span><span class="delimiter">&quot;</span></span>: {
       <span class="key"><span class="delimiter">&quot;</span><span class="content">author</span><span class="delimiter">&quot;</span></span>: <span class="integer">9</span>,
       <span class="key"><span class="delimiter">&quot;</span><span class="content">comments</span><span class="delimiter">&quot;</span></span>: [ <span class="integer">4</span>, <span class="integer">5</span> ]
    }, {
     <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1</span><span class="delimiter">&quot;</span></span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">title</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">Dependency Injection is Not a Virtue</span><span class="delimiter">&quot;</span></span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">rels</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">links</span><span class="delimiter">&quot;</span></span>: {
       <span class="key"><span class="delimiter">&quot;</span><span class="content">author</span><span class="delimiter">&quot;</span></span>: <span class="integer">9</span>,
       <span class="key"><span class="delimiter">&quot;</span><span class="content">comments</span><span class="delimiter">&quot;</span></span>: [ <span class="integer">6</span> ]
     }

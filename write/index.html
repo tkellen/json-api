@@ -210,7 +210,7 @@ Content-Type: application/json
     &quot;title&quot;: &quot;Mustaches on a Stick&quot;,
     &quot;href&quot;: &quot;http://example.com/images/mustaches.png&quot;
   }],
-  &quot;rels&quot;: {
+  &quot;links&quot;: {
     &quot;posts&quot;: &quot;http://example.com/posts/{posts.id}&quot;
   },
   &quot;meta&quot;: {
@@ -324,11 +324,11 @@ Content-Type: application/json-patch+json
 time.</p>
 <h3 class='anchorable-toc' id='toc_relationships'>Relationships</h3>
 <p>Relationship updates are represented as JSON Patch operations on the
-<code>rels</code> document.</p>
+<code>links</code> document.</p>
 <h4 class='anchorable-toc' id='toc_to-one-relationships'>To-One Relationships</h4>
 <p>To update a to-one relationship, the client <strong>MUST</strong> issue a <code>PATCH</code>
 request that includes a <code>replace</code> operation on the relationship
-<code>rels/&lt;name&gt;</code>.</p>
+<code>links/&lt;name&gt;</code>.</p>
 
 <p>For example, for the following <code>GET</code> request:</p>
 <div class="highlight text "><div class="ribbon"></div><table class="CodeRay"><tr>
@@ -354,7 +354,7 @@ request that includes a <code>replace</code> operation on the relationship
 Content-Type: application/json
 
 {
-  &quot;rels&quot;: {
+  &quot;links&quot;: {
     &quot;photos.author&quot;: &quot;http://example.com/people/{photos.author}&quot;
   },
   &quot;photos&quot;: {
@@ -362,7 +362,7 @@ Content-Type: application/json
     &quot;href&quot;: &quot;http://example.com/photos/1&quot;,
     &quot;title&quot;: &quot;Hamster&quot;,
     &quot;src&quot;: &quot;images/hamster.png&quot;,
-    &quot;rels&quot;: {
+    &quot;links&quot;: {
       &quot;author&quot;: 1
     }
   }
@@ -386,7 +386,7 @@ Content-Type: application/json-patch+json
 Accept: application/json
 
 [
-  { &quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/rels/author&quot;, &quot;value&quot;: 2 }
+  { &quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/links/author&quot;, &quot;value&quot;: 2 }
 ]
 </pre></td>
 </tr></table>
@@ -395,8 +395,8 @@ Accept: application/json
 response, they are updated as if they were a set.</p>
 
 <p>To remove an element from a to-many relationship, use a <code>remove</code>
-operation on <code>rels/&lt;name&gt;/&lt;id&gt;</code>. To add an element, use an <code>add</code>
-operation on <code>rels/&lt;name&gt;/-</code>.</p>
+operation on <code>links/&lt;name&gt;/&lt;id&gt;</code>. To add an element, use an <code>add</code>
+operation on <code>links/&lt;name&gt;/-</code>.</p>
 
 <p>For example, for the following <code>GET</code> request:</p>
 <div class="highlight text "><div class="ribbon"></div><table class="CodeRay"><tr>
@@ -422,7 +422,7 @@ operation on <code>rels/&lt;name&gt;/-</code>.</p>
 Content-Type: application/json
 
 {
-  &quot;rels&quot;: {
+  &quot;links&quot;: {
     &quot;photos.author&quot;: &quot;http://example.com/people/{photos.author}&quot;
   },
   &quot;photos&quot;: {
@@ -430,7 +430,7 @@ Content-Type: application/json
     &quot;href&quot;: &quot;http://example.com/photos/1&quot;,
     &quot;title&quot;: &quot;Hamster&quot;,
     &quot;src&quot;: &quot;images/hamster.png&quot;,
-    &quot;rels&quot;: {
+    &quot;links&quot;: {
       &quot;comments&quot;: [ 1, 5, 12, 17 ]
     }
   }
@@ -450,7 +450,7 @@ the <code>PATCH</code> request:</p>
   <td class="code"><pre>PATCH /photos/1
 
 [
-  { &quot;op&quot;: &quot;add&quot;, &quot;path&quot;: &quot;/rels/comments/-&quot;, &quot;value&quot;: 30 }
+  { &quot;op&quot;: &quot;add&quot;, &quot;path&quot;: &quot;/links/comments/-&quot;, &quot;value&quot;: 30 }
 ]
 </pre></td>
 </tr></table>
@@ -466,7 +466,7 @@ the <code>PATCH</code> request:</p>
   <td class="code"><pre>PATCH /photos/1
 
 [
-  { &quot;remove&quot;: &quot;rels/comments/5&quot; }
+  { &quot;remove&quot;: &quot;links/comments/5&quot; }
 ]
 </pre></td>
 </tr></table>
