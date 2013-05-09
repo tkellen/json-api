@@ -263,7 +263,7 @@ Content-Type: application/json
 <strong>MUST</strong> interpret those errors in accordance with HTTP semantics.</p>
 <h2 class='anchorable-toc' id='toc_updating-a-document-code-patch-code'>Updating a Document (<code>PATCH</code>)</h2>
 <p>The body of the <code>PATCH</code> request <strong>MUST</strong> be in JSON format with a <code>Content-Type</code>
-header of <code>application/json-patch</code>.</p>
+header of <code>application/json-patch+json</code>.</p>
 
 <p>It <strong>MUST</strong> be a valid <a href="http://tools.ietf.org/html/rfc6902">JSON Patch (RFC 6902)</a> document.</p>
 <h3 class='anchorable-toc' id='toc_attributes'>Attributes</h3>
@@ -312,7 +312,7 @@ following request:</p>
 6
 </pre></td>
   <td class="code"><pre>PATCH /photos/1
-Content-Type: application/json-patch
+Content-Type: application/json-patch+json
 
 [
   { &quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/src&quot;, &quot;value&quot;: &quot;http://example.com/hamster.png&quot; }
@@ -382,7 +382,7 @@ Content-Type: application/json
 7
 </pre></td>
   <td class="code"><pre>PATCH /photos/1
-Content-Type: application/json-patch
+Content-Type: application/json-patch+json
 Accept: application/json
 
 [
