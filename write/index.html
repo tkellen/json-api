@@ -33,7 +33,10 @@ documents, which can be used to fetch <strong>and</strong> update.</p>
 <h2 class='anchorable-toc' id='toc_creating-a-document'>Creating a Document</h2>
 <p>A JSON API document is <em>created</em> by making a <code>POST</code> request to the URL
 that represents a collection of documents that the new document should
-belong to.</p>
+belong to. While this method is preferred, you can always use anything that&#39;s
+valid with RFC 2616, as long as it&#39;s compliant. For example, PUT can be used
+to create documents if you wish. We believe most people will generally use
+POST, so we&#39;ll elaborate on it further below.</p>
 
 <p>In general, this is a collection scoped to the <strong>type</strong> of document.</p>
 
