@@ -30,7 +30,7 @@ operations allowed in this top level array.
 ### Request URLs and Patch Paths <a href="#patch-urls" id="patch-urls" class="headerlink"></a>
 
 The request URL and each Patch operation's `"path"` are complementary and
-MUST combine to target a particular resource, collection, attribute, or
+MUST combine to target a particular record, collection, attribute, or
 relationship.
 
 If a server supports the Patch extension, it **MUST** allow PATCH requests at
@@ -39,14 +39,14 @@ any resource or relationship URLs that accept POST, PUT, or DELETE requests.
 PATCH requests **MAY** also be allowed at the root URL of an API. In this
 case, every `"path"` within a Patch operation **MUST** include the full
 resource path relative to the root URL. This allows for general "fire hose"
-updates to any resource or relationship represented by an API. As stated
-above, a server **MAY** limit the type, order, and count of bulk operations.
+updates. As stated above, a server **MAY** limit the type, order, and count
+of bulk operations.
 
-### Creating Resources <a href="#patch-creating" id="patch-creating" class="headerlink"></a>
+### Creating Records <a href="#patch-creating" id="patch-creating" class="headerlink"></a>
 
-To create a resource, request an `"add"` operation with a `"path"` that points
-to the end of its corresponding resource collection (`"/-"`). The `"value"`
-should contain a resource object.
+To create a record, request an `"add"` operation with a `"path"` that points
+to the end of its corresponding collection (`"/-"`). The `"value"` should
+contain a record.
 
 For example, a new photo could be created with the following request:
 
@@ -92,7 +92,7 @@ To update a relationship, send an appropriate Patch operation to the
 relationship's URL.
 
 A server **MAY** also support relationship updates at a higher level, such
-as the resource's URL or the API's root URL. As discussed above, the request
+as the records's URL or the API's root URL. As discussed above, the request
 URL and each Patch operation's `"path"` must be complementary and combine to
 target a particular relationship's URL.
 
@@ -136,9 +136,9 @@ For all operations, the `"value"` **MUST** contain an object that contains
 `type` and `id` members, or an array of objects that each contain `type`
 and `id` members.
 
-If a client requests a `"replace"` operation to a *to-many relationship URL*, the
-server **MUST** either completely replace every member of the relationship,
-return an appropriate error response if some resources can not be found or
+If a client requests a `"replace"` operation to a *to-many relationship URL*,
+the server **MUST** either completely replace every member of the relationship,
+return an appropriate error response if some records can not be found or
 accessed, or return a `403 Forbidden` response if complete replacement is
 not allowed by the server.
 
@@ -187,10 +187,10 @@ Accept: application/vnd.api+json; ext=patch
 ]
 ```
 
-### Deleting a Resource <a href="#patch-deleting" id="patch-deleting" class="headerlink"></a>
+### Deleting a Record <a href="#patch-deleting" id="patch-deleting" class="headerlink"></a>
 
-To delete a resource, perform a `"remove"` operation with a URL and `"path"`
-that targets the resource.
+To delete a record, perform a `"remove"` operation with a URL and `"path"`
+that targets the record.
 
 For instance, photo `1` might be deleted with the following request:
 
@@ -214,10 +214,10 @@ date.
 
 #### 200 OK <a href="#patch-responses-200" id="patch-responses-200" class="headerlink"></a>
 
-If a server accepts an update but also changes the resource(s) in other ways
+If a server accepts an update but also changes the records(s) in other ways
 than those specified by the request (for example, updating the `updatedAt`
 attribute or a computed `sha`), it **MUST** return a `200 OK` response as well
-as a representation of the updated resources.
+as a representation of the updated records.
 
 The server **MUST** specify a `Content-Type` header of `application/vnd.api+json;
 ext=patch`. The body of the response **MUST** contain an array of JSON objects,

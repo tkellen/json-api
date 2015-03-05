@@ -22,23 +22,23 @@ implementations. There is a [custom adapter](https://github.com/daliwali/ember-j
   Orbit's Common Library includes
   [JSONAPISource](https://github.com/orbitjs/orbit.js/blob/master/lib/orbit-common/jsonapi-source.js)
   for accessing JSON API servers. Orbit can be used
-  independently or with Ember.js through the 
+  independently or with Ember.js through the
   [ember-orbit](https://github.com/orbitjs/ember-orbit) integration library.
 
 ### iOS <a href="#client-ios" id="client-ios" class="headerlink"></a>
 
-* [jsonapi-ios](https://github.com/joshdholtz/jsonapi-ios) is a library for loading data from a JSON API datasource. Parses JSON API data into models with support for auto-linking of resources and custom model classes.
+* [jsonapi-ios](https://github.com/joshdholtz/jsonapi-ios) is a library for loading data from a JSON API datasource. Parses JSON API data into models with support for auto-linking of records and custom model classes.
 
 ### Ruby <a href="#client-ruby" id="client-ruby" class="headerlink"></a>
 
-* [jsonapi-consumer](https://github.com/jsmestad/jsonapi-consumer) a ruby library for consuming JSONAPI payloads. 
+* [jsonapi-consumer](https://github.com/jsmestad/jsonapi-consumer) a ruby library for consuming JSONAPI payloads.
 
 ## Server <a href="#server" id="server" class="headerlink"></a>
 
 ### PHP <a href="#server-php" id="server-php" class="headerlink"></a>
 
 * [FriendsOfSymfony / FOSRestBundle](https://github.com/FriendsOfSymfony/FOSRestBundle/issues/452)
-* [GOintegro / HATEOAS](https://github.com/gointegro/hateoas-bundle) is a library and Symfony 2 bundle that allows you to magically expose your Doctrine 2 mapped entities as resources in a HATEOAS API and supports the full spec of JSON-API for serializing and fetching.
+* [GOintegro / HATEOAS](https://github.com/gointegro/hateoas-bundle) is a library and Symfony 2 bundle that allows you to magically expose your Doctrine 2 mapped entities as records in a HATEOAS API and supports the full spec of JSON-API for serializing and fetching.
 
 ### Node.js <a href="#server-node-js" id="server-node-js" class="headerlink"></a>
 * [Fortune.js](http://fortunejs.com) is a framework built to implement json-api.

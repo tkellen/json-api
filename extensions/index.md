@@ -19,11 +19,11 @@ JSON API can be extended in several ways:
 JSON API currently supports the following official extensions:
 
 * [Bulk extension](/extensions/bulk/) - provides support for performing multiple
-  operations in a request, including adding and removing multiple resources.
+  operations in a request, including adding and removing multiple records.
   The Bulk extension is referenced with the media type parameter `ext=bulk`.
 
-* [Patch extension](/extensions/patch/) - provides support for modification of resources
-  with the HTTP PATCH method [[RFC5789](http://tools.ietf.org/html/rfc5789)]
+* [Patch extension](/extensions/patch/) - provides support for modification of
+  records with the HTTP PATCH method [[RFC5789](http://tools.ietf.org/html/rfc5789)]
   and the JSON Patch format [[RFC6902](http://tools.ietf.org/html/rfc6902)].
   The Patch extension is referenced with the media type parameter `ext=patch`.
 
@@ -35,7 +35,7 @@ media type parameter.
 
 It is strongly recommended that custom extensions be prefixed with a unique
 identifier for your organization to avoid namespace collision. For example,
-`my-org/embedded-resources`.
+`my-org/embedded-records`.
 
 ## Profiles <a href="#profiles" id="profiles" class="headerlink"></a>
 
@@ -98,13 +98,13 @@ The Example.com API Profile
 ===========================
 
 The Example.com API uses simple offset and limit-based pagination. Paginated
-resources will include the standard JSON API `next`, `prev`, `first`, and
+records will include the standard JSON API `next`, `prev`, `first`, and
 `last` pagination links in the top-level `links` object when they are not
 `null`.
 
 In addition, a `page` member will be added to the top-level `meta` object
 that includes the following members: `offset`, `limit`, and `total`. The
-`total` member represents the total count of resources in the paginated
+`total` member represents the total count of records in the paginated
 collection. You can use the `offset` and `limit` members to construct your
 own custom pagination links with the query parameters `page[offset]` and
 `page[limit]`.

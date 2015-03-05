@@ -7,8 +7,8 @@ title: "Bulk Extension"
 
 The "Bulk extension" is an [official
 extension](/extensions/#official-extensions) of the JSON API specification.
-It provides support for performing multiple operations in a request,
-including adding and removing multiple resources.
+It provides support for performing multiple operations in a request, including
+adding and removing multiple records.
 
 Servers and clients **MUST** negotiate support for and use of the Bulk extension
 [as described in the base specification](/format/#extending) using `bulk` as the
@@ -23,12 +23,12 @@ Therefore, any request that involves multiple operations **MUST** only
 succeed if all operations are performed successfully. The state of the
 server **MUST NOT** be changed by a request if any individual operation fails.
 
-## Creating Multiple Resources <a href="#creating-multiple-resources" id="creating-multiple-resources" class="headerlink"></a>
+## Creating Multiple Records <a href="#creating-multiple-records" id="creating-multiple-records" class="headerlink"></a>
 
-Multiple resources can be created by sending a `POST` request to a URL that
-represents a collection of resources. The request **MUST** include an array
-of resource objects as primary data. Each resource object **MUST** contain
-at least a `type` member.
+Multiple records can be created by sending a `POST` request to a URL that
+represents a collection of records. The request **MUST** include an array
+of records as primary data. Each record **MUST** contain at least a `type`
+member.
 
 For instance, multiple photos might be created with the following request:
 
@@ -51,12 +51,12 @@ Accept: application/vnd.api+json; ext=bulk
 ```
 
 
-## Updating Multiple Resources <a href="#updating-multiple-resources" id="updating-multiple-resources" class="headerlink"></a>
+## Updating Multiple Records <a href="#updating-multiple-records" id="updating-multiple-records" class="headerlink"></a>
 
-Multiple resources can be updated by sending a `PUT` request to a URL that
-represents a collection of resources to which they all belong. The request
-**MUST** include an array of resource objects as primary data. Each resource
-object **MUST** contain at least `type` and `id` members.
+Multiple records can be updated by sending a `PUT` request to a URL
+whose representation includes all the records to be updated. The
+request **MUST** include an array of records as primary data. Each
+record **MUST** contain at least `type` and `id` members.
 
 For example:
 
@@ -78,10 +78,10 @@ Accept: application/vnd.api+json; ext=bulk
 }
 ```
 
-## Deleting Multiple Resources <a href="#deleting-multiple-resources" id="deleting-multiple-resources" class="headerlink"></a>
+## Deleting Multiple Records <a href="#deleting-multiple-records" id="deleting-multiple-records" class="headerlink"></a>
 
-Multiple resources can be deleted by sending a `DELETE` request to a URL that
-represents a collection of resources to which they all belong.
+Multiple records can be deleted by sending a `DELETE` request to a URL whose
+representation includes all the records to be deleted.
 
 The body of the request **MUST** contain a `data` member whose value is an
 object that contains `type` and `id`, or an array of objects that each

@@ -72,10 +72,9 @@ Here's an example response from a blog that implements JSON API:
 ```
 
 The response above contains the first in a collection of "posts", as well as
-links to subsequent members in that collection. It also contains resources
-linked to the post, including its author and comments. Last but not least,
-links are provided that can be used to fetch or update any of these
-resources.
+links to subsequent members in that collection. It also contains records linked
+to the post, including its author and comments. Last but not least, links are
+provided that can be used to fetch or update information.
 
 JSON API covers creating and updating resources as well, not just responses.
 

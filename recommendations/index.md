@@ -9,12 +9,12 @@ are beyond the scope of the base JSON API specification.
 
 ## Recommendations for Naming <a href="#naming" id="naming" class="headerlink"></a>
 
-It is recommended that resource types, attribute names, and association
+It is recommended that record types, attribute names, and association
 names be "dasherized"; i.e. consist of only lower case alphanumeric
 characters and dashes (U+002D HYPHEN-MINUS, "-").
 
-It is also recommended that resource types be pluralized. Dasherized and
-pluralized resource types can be used as URL segments without translation,
+It is also recommended that record types be pluralized. Dasherized and
+pluralized record types can be used as URL segments without translation,
 as discussed below.
 
 ## Recommendations for URL Design <a href="#urls" id="urls" class="headerlink"></a>
@@ -22,8 +22,8 @@ as discussed below.
 ### Reference Document <a href="#urls-reference-document" id="urls-reference-document" class="headerlink"></a>
 
 When determining an API's URL structure, it is helpful to consider that all of
-its resources exist in a single "reference document" in which each resource is
-addressable at a unique path. Resources are grouped by type at the top level of
+its records exist in a single "reference document" in which each record is
+addressable at a unique path. Records are grouped by type at the top level of
 this document. Individual resources are keyed by ID within these typed
 collections. Attributes and links within individual resources are uniquely
 addressable according to the resource object structure described above.

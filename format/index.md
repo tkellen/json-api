@@ -7,11 +7,12 @@ title: "Format"
 
 ## Introduction <a href="#introduction" id="introduction" class="headerlink"></a>
 
-JSON API is a specification for how a client should request that resources be
-fetched or modified, and how a server should respond to those requests.
+JSON API is a specification describing how a client should make requests to
+retrieve or modify information, and how a server should respond to those
+requests.
 
-JSON API is designed to minimize both the number of requests and the amount of
-data transmitted between clients and servers. This efficiency is achieved
+JSON API is designed to minimize both the number of requests and the amount
+of data transmitted between clients and servers. This efficiency is achieved
 without compromising readability, flexibility, or discoverability.
 
 JSON API requires use of the JSON API media type
@@ -78,16 +79,17 @@ called out below.
 A JSON object **MUST** be at the root of every JSON API response containing
 data. This object defines a document's "top level". The `204 No Content`
 response cannot contain a message body, and so does not include a data
-document.
+object.
 
-The document's "primary data" is a representation of the resource, collection
-of resources, or resource relationship primarily targeted by a request.
+A document's "primary data" is a representation of a record, collection
+of records, or record relationships that are primarily targeted by a
+request.
 
 A document **MUST** contain either primary data or an array of error objects.
 
 Primary data **MUST** appear under a top-level key named `"data"`. Primary
-data **MUST** be either a single resource object, an array of resource
-objects, or a value representing a resource relationship.
+data **MUST** be a single "record", an array of "records", or a value
+representing a record relationship.
 
 ```javascript
 {
@@ -115,32 +117,11 @@ The top level of a document **MUST NOT** contain any additional members whose
 names start with alphanumeric characters. Additional members whose names start
 with non-alphanumeric characters are allowed.
 
-### Resource Objects <a href="#document-structure-resource-objects" id="document-structure-resource-objects" class="headerlink"></a>
+### Records <a href="#document-structure-records" id="document-structure-records" class="headerlink"></a>
 
-"Resource objects" appear in a JSON API document to represent primary data
-and included resources.
+"Records" appear in a JSON API document to represent primary and included data.
 
-A resource object **MUST** contain at least the following top-level members:
-
-* `"id"`
-* `"type"`
-
-In addition, a resource object **MAY** contain any of these top-level members:
-
-* `"links"`: information about a resource's relationships (described
-  below).
-* `"meta"`: non-standard meta-information about a resource that can not be
-  represented as an attribute or relationship.
-
-Any other top-level member in a resource object represents an "attribute".
-An attribute may contain any valid JSON value.
-
-> Note: Although has-one foreign keys are often stored as columns in a
-database alongside other fields, foreign keys **MUST NOT** be included in a
-resource's attributes. All relations **MUST** be represented under a
-resource's links object, as described below.
-
-Here's how an article (i.e. a resource of type "articles") might appear in a document:
+Here's how an article (i.e. a record of type "articles") might appear in a document:
 
 ```javascript
 // ...
@@ -152,43 +133,58 @@ Here's how an article (i.e. a resource of type "articles") might appear in a doc
 // ...
 ```
 
-#### Resource Identification <a href="#document-structure-resource-identification" id="document-structure-resource-identification" class="headerlink"></a>
+A record **MUST** contain at least the following top-level members:
 
-Every JSON API resource object is uniquely identified by a combination of
-its `type` and `id` members. This identification is used for linkage in
-compound documents and batch operations that modify multiple resources at a
-time.
+* `"id"`
+* `"type"`
 
-A resource object's `type` and `id` pair **MUST** refer to a single, unique
-resource.
+In addition, a record **MAY** contain any of these top-level members:
 
-#### Resource Types <a href="#document-structure-resource-types" id="document-structure-resource-types" class="headerlink"></a>
+* `"links"`: information about a record's relationships (described below).
+* `"meta"`: non-standard meta-information about a record that can not be
+  represented as an attribute or relationship.
 
-Each resource object **MUST** contain a `type` member, whose value **MUST**
-be a string. The `type` is used to describe resource objects that share
+Any other top-level member in a record represents an "attribute", which may
+contain any valid JSON value.
+
+> Note: Although has-one foreign keys are often stored as columns in a
+database alongside other fields, foreign keys **MUST NOT** be included
+in a record's attributes. All relations **MUST** be represented under a
+records's links object, as described below.
+
+#### Record Identification <a href="#document-structure-record-identification" id="document-structure-record-identification" class="headerlink"></a>
+
+Every JSON API record is uniquely identified by a combination of its `type`
+and `id` members. This identification is used for linkage in compound documents
+and batch operations that modify multiple records simultaneously.
+
+A record's `type` and `id` pair **MUST** refer to a single, unique record.
+
+#### Record Types <a href="#document-structure-record-types" id="document-structure-record-types" class="headerlink"></a>
+
+Each record object **MUST** contain a `type` member, whose value **MUST**
+be a string. The `type` is used to describe record objects that share
 common attributes and relationships.
 
 > Note: This spec is agnostic about inflection rules, so the value of `type`
 can be either plural or singular. However, the same value should be used
 consistently throughout an implementation.
 
-#### Resource IDs <a href="#document-structure-resource-ids" id="document-structure-resource-ids" class="headerlink"></a>
+#### Record IDs <a href="#document-structure-record-ids" id="document-structure-record-ids" class="headerlink"></a>
 
-Each resource object **MUST** contain an `id` member, whose value **MUST**
-be a string.
+Each record **MUST** contain an `id` member, whose value **MUST** be a string.
 
 #### Links
 
 The value of the `"links"` key is a JSON object (a "links object") that
-represents linked resources, keyed by the name of each association.
+represents a linked record, keyed by the name of each association.
 
-The key `"self"` is reserved within the links object for the resource URL,
+The key `"self"` is reserved within the links object for the record URL,
 as described below.
 
-#### Resource URLs <a href="#document-structure-resource-urls" id="document-structure-resource-urls" class="headerlink"></a>
+#### Record URLs <a href="#document-structure-record-urls" id="document-structure-record-urls" class="headerlink"></a>
 
-A resource object **MAY** include a URL in its links object, keyed by
-`"self"`, that identifies the resource represented by the resource object.
+A record **MAY** include a URL in its links object, keyed by `"self"`.
 
 ```json
 // ...
@@ -204,23 +200,23 @@ A resource object **MAY** include a URL in its links object, keyed by
 ```
 
 A server **MUST** respond to a `GET` request to the specified URL with a
-response that includes the resource as the primary data.
+response that includes the record as the primary data.
 
-#### Resource Relationships <a href="#document-structure-resource-relationships" id="document-structure-resource-relationships" class="headerlink"></a>
+#### Record Relationships <a href="#document-structure-record-relationships" id="document-structure-record-relationships" class="headerlink"></a>
 
-A resource object **MAY** contain references to other resource objects
-("relationships"). Relationships may be to-one or to-many. Relationships
-can be specified by including a member in a resource's links object.
+A record **MAY** contain references to other records ("relationships").
+Relationships may be to-one or to-many. Relationships can be specified by
+including a member in a record's links object.
 
 The name of the relationship declared in the key **SHALL NOT** be `"self"`.
 
 The value of a relationship **MUST** be one of the following:
 
-* A string, which represents a URL for the related resource(s) (a "related
-  resource URL"). When fetched, it returns the related resource object(s) as the
-  response's primary data. For example, an `article`'s `comments` could specify a
-  URL that returns a list of comment resource objects when retrieved through a
-  `GET` request. A related resource URL **SHOULD** remain constant even when the
+* A string, which represents a URL for the related record(s) (a "related
+  record URL"). When fetched, it returns the related record object(s) as the
+  response's primary data. For example, an `article`'s `comments` could specify
+  a URL that returns a list of comment records when retrieved through a `GET`
+  request. A related record URL **SHOULD** remain constant even when the
   relationship it represents mutates.
 
 * An object (a "link object").
@@ -233,10 +229,10 @@ one of the following:
   relationship. For example, it would allow a client to remove an `author` from
   an `article` without deleting the `people` resource itself.
 * A `resource` member, whose value is a related resource URL (as defined above).
-* Linkage to other resource objects ("object linkage") included in a compound
-  document. This allows a client to link together all of the resource objects
-  included in a compound document without having to `GET` one of the
-  relationship URLs. Linkage **MUST** be expressed as:
+* Linkage to other records ("object linkage") included in a compound document.
+  This allows a client to link together all of the records included in a
+  compound document without having to `GET` one of the relationship URLs.
+  Linkage **MUST** be expressed as:
   * `type` and `id` members for to-one relationships. `type` is not required
     if the value of `id` is `null`.
   * `type` and `id` members for homogeneous to-many relationships. `type` is
@@ -249,8 +245,8 @@ one of the following:
 A link object that represents a to-many relationship **MAY** also contain
 pagination links, as described below.
 
-If a link object refers to resource objects included in the same compound
-document, it **MUST** include object linkage to those resource objects.
+If a link object refers to records included in the same compound document,
+it **MUST** include object linkage to those records.
 
 For example, the following article is associated with an `author` and `comments`:
 
@@ -278,12 +274,12 @@ For example, the following article is associated with an `author` and `comments`
 
 The `author` relationship includes a URL for the relationship itself (which
 allows the client to change the related author without deleting the `people`
-object), a URL to fetch the resource objects, and linkage information for
-the current compound document.
+object), a URL to fetch the records, and linkage information for the current
+compound document.
 
 The `comments` relationship is simpler: it just provides a URL to fetch the
-comments. The following resource object, which provides the `comments`
-relationship as a string value rather than an object, is equivalent:
+comments. The following record, which provides the `comments` relationship as
+a string value rather than an object, is equivalent:
 
 ```javascript
 // ...
@@ -308,11 +304,11 @@ relationship as a string value rather than an object, is equivalent:
 ### Compound Documents <a href="#document-structure-compound-documents" id="document-structure-compound-documents" class="headerlink"></a>
 
 To reduce the number of HTTP requests, servers **MAY** allow responses that
-include linked resources along with the requested primary resources. Such
-responses are called "compound documents".
+include linked records along with the requested primary record. Such responses
+are called "compound documents".
 
-In a compound document, all linked resources **MUST** be included as an array of
-resource objects in a top level `"included"` member.
+In a compound document, all linked records **MUST** be included as an array of
+records in a top level `"included"` member.
 
 A complete example document with multiple included relationships:
 
@@ -365,22 +361,21 @@ A complete example document with multiple included relationships:
 }
 ```
 
-A compound document **MUST NOT** include more than one resource object for
-each `type` and `id` pair.
+A compound document **MUST NOT** include more than one record for each `type`
+and `id` pair.
 
 > Note: In a single document, you can think of the `type` and `id` as a
-composite key that uniquely references resource objects in another part of
-the document.
+composite key that uniquely references records in another part of the
+document.
 
-> Note: This approach ensures that a single canonical resource object is
-returned with each response, even when the same resource is referenced
-multiple times.
+> Note: This approach ensures that a single canonical record is returned
+with each response, even when the same record is referenced multiple times.
 
 ### Meta information <a href="#document-structure-meta" id="document-structure-meta" class="headerlink"></a>
 
-As discussed above, the document **MAY** be extended to include
-meta-information as `"meta"` members in several locations: at the top-level,
-within resource objects, and within link objects.
+As discussed above, the document **MAY** be extended to include meta-information
+as `"meta"` members in several locations: at the top-level, within records, and
+within a record's link object.
 
 All `"meta"` members **MUST** have an object as a value, the contents of which
 can be used for custom extensions.
@@ -410,10 +405,10 @@ The top-level links object **MAY** contain the following members:
 * `"self"` - a link for fetching the data in the response document.
 * Pagination links for the primary data, as described below.
 
-## Fetching Resources <a href="#fetching" id="fetching" class="headerlink"></a>
+## Fetching Records <a href="#fetching" id="fetching" class="headerlink"></a>
 
-A resource, or collection of resources, can be fetched by sending a `GET`
-request to an endpoint.
+A record, or collection of records, can be fetched by sending a `GET` request
+to an endpoint.
 
 JSON API requests **MUST** include an `Accept` header specifying the JSON
 API media type. Servers **MUST** return a `406 Not Acceptable` status code
@@ -425,26 +420,26 @@ via a web browser.
 
 Responses can be further refined with the optional features described below.
 
-### Inclusion of Linked Resources <a href="#fetching-includes" id="fetching-includes" class="headerlink"></a>
+### Inclusion of Linked Records <a href="#fetching-includes" id="fetching-includes" class="headerlink"></a>
 
-An endpoint **MAY** return resources linked to the primary data by default.
+An endpoint **MAY** return records linked to the primary data by default.
 
-An endpoint **MAY** also support custom inclusion of linked resources based
+An endpoint **MAY** also support custom inclusion of linked records based
 upon an `include` request parameter. This parameter **MUST** specify the
 relationship using the name used in the `links` section of the primary data.
 
 If a client supplies an `include` parameter, the server **MUST NOT** include
-other resource objects in the `included` section of the compound document.
+other records in the `included` section of the compound document.
 
 The value of the `include` parameter is a comma-separated (U+002C COMMA,
 ",") list of relationship paths. A relationship path is a dot-separated
 (U+002E FULL-STOP, ".") list of relationship names. Each relationship name
 **MUST** be identical to the key in the `links` section of its parent
-resource object.
+record.
 
 > Note: For example, a relationship path could be `comments.author`, where
-`comments` is a relationship listed under a `articles` resource object, and
-`author` is a relationship listed under a `comments` resource object.
+`comments` is a relationship listed under a `articles` record, and `author`
+is a relationship listed under a `comments` record.
 
 For instance, comments could be requested with an article:
 
@@ -452,7 +447,7 @@ For instance, comments could be requested with an article:
 GET /articles/1?include=comments
 ```
 
-In order to request resources linked to other resources, a dot-separated path
+In order to request records linked to other records, a dot-separated path
 for each relationship name can be specified:
 
 ```text
@@ -464,7 +459,7 @@ include `comments` in the response. This can happen if the client already
 has the `comments` locally, and now wants to fetch the associated authors
 without fetching the comments again.
 
-Multiple linked resources can be requested in a comma-separated list:
+Multiple linked records can be requested in a comma-separated list:
 
 ```text
 GET /articles/1?include=author,comments,comments.author
@@ -484,19 +479,18 @@ GET /articles?include=author&fields[articles]=title,body&fields[people]=name
 If a client requests a restricted set of fields, an endpoint **MUST NOT**
 include additional attributes or relationships in the response.
 
-Resource object members that are not attributes or relationships are subject
-to the rules stated in the [Resource Objects](#document-structure-resource-objects)
-section. In particular, the `type` and `id` members **MUST** always be included
-in each resource object, even if they are not specified in the `fields[TYPE]`
-parameter.
+Record members that are not attributes or relationships are subject to the rules
+stated in the [Resource Objects](#document-structure-resource-objects) section.
+In particular, the `type` and `id` members **MUST** always be included in each
+resource object, even if they are not specified in the `fields[TYPE]` parameter.
 
 ### Sorting <a href="#fetching-sorting" id="fetching-sorting" class="headerlink"></a>
 
-A server **MAY** choose to support requests to sort resource collections
+A server **MAY** choose to support requests to sort record collections
 according to one or more criteria ("sort fields").
 
 > Note: Although recommended, sort fields do not necessarily need to
-correspond to resource attribute and association names.
+correspond to record attribute and association names.
 
 > Note: It is recommended that dot-separated (U+002E FULL-STOP, ".") sort
 fields be used to request sorting based upon relationship attributes. For
@@ -539,7 +533,7 @@ alphabetical order.
 
 ### Pagination <a href="#fetching-pagination" id="fetching-pagination" class="headerlink"></a>
 
-A server **MAY** choose to limit the number of resources returned in a response
+A server **MAY** choose to limit the number of records returned in a response
 to a subset ("page") of the whole set available.
 
 A server **MAY** provide links to traverse a paginated data set ("pagination
@@ -586,8 +580,8 @@ strategies.
 
 ## Creating, Updating and Deleting Resources <a href="#crud" id="crud" class="headerlink"></a>
 
-A server **MAY** allow resources of a given type to be created. It **MAY**
-also allow existing resources to be modified or deleted.
+A server **MAY** allow records of a given type to be created. It **MAY**
+also allow existing records to be modified or deleted.
 
 Any requests that contain content **MUST** include a `Content-Type` header
 whose value is `application/vnd.api+json`. This header value **MUST** also
@@ -598,9 +592,9 @@ partial updates are allowed.
 
 ### Creating Resources <a href="#crud-creating" id="crud-creating" class="headerlink"></a>
 
-A resource can be created by sending a `POST` request to a URL that represents
-a collection of resources. The request **MUST** include a single resource object
-as primary data. The resource object **MUST** contain at least a `type` member.
+A record can be created by sending a `POST` request to a URL that represents
+a collection of records. The request **MUST** include a single record as
+primary data. The record **MUST** contain at least a `type` member.
 
 > Note: The `type` member is required throughout requests and responses in
 JSON API. There are some cases, such as when `POST`ing to an endpoint
@@ -629,9 +623,9 @@ Accept: application/vnd.api+json
 #### Client-Generated IDs <a href="#crud-creating-client-ids" id="crud-creating-client-ids" class="headerlink"></a>
 
 A server **MAY** accept a client-generated ID along with a request to create
-a resource. An ID **MUST** be specified with an `"id"` key, the value of
-which **MUST** be a universally unique identifier. The client **SHOULD** use
-a properly generated and formatted *UUID* as described in RFC 4122
+a record. An ID **MUST** be specified with an `"id"` key, the value of which
+**MUST** be a universally unique identifier. The client **SHOULD** use a
+properly generated and formatted *UUID* as described in RFC 4122
 [[RFC4122](http://tools.ietf.org/html/rfc4122.html)].
 
 > NOTE: In some use-cases, such as importing data from another source, it
@@ -657,7 +651,7 @@ Accept: application/vnd.api+json
 ```
 
 A server **MUST** return `403 Forbidden` in response to an unsupported request
-to create a resource with a client-generated ID.
+to create a record with a client-generated ID.
 
 #### Responses <a href="#crud-creating-responses" id="crud-creating-responses" class="headerlink"></a>
 
@@ -674,7 +668,7 @@ ID](#crud-creating-client-ids), and a resource has been created, the server
 **MUST** return a `201 Created` status code.
 
 The response **MUST** also include a document that contains the primary
-resource created.
+record created.
 
 If the data object returned by the response contains a `self` key in its
 `links` member, the value of the `self` member **MUST** match the value of
@@ -705,7 +699,7 @@ ID](#crud-creating-client-ids), the server **MUST** return either a `201
 Created` status code and response document (as described above) or a `204 No
 Content` status code with no response document.
 
-> Note: If a `204` response is received the client should consider the data
+> Note: If a `204` response is received, the client should consider the data
 object sent in the request to be accepted by the server, as if the server
 had returned it back in a `201` response.
 
@@ -730,15 +724,15 @@ details **MAY** also be returned, as discussed below.
 
 ### Updating Resources <a href="#crud-updating" id="crud-updating" class="headerlink"></a>
 
-A resource's attributes and relationships can be updated by sending a `PUT`
-request to the URL that represents the resource.
+A record's attributes and relationships can be updated by sending a `PUT`
+request to the URL that represents the record.
 
-The URL for a resource can be obtained:
+The URL for a record can be obtained:
 
-* from the `self` link in the resource object
+* from the `self` link in the record
 * for a *data object*, the original URL that was used to `GET` the document
 
-The `PUT` request **MUST** include a single resource object as primary data.
+The `PUT` request **MUST** include a single record as primary data.
 
 For example:
 
@@ -756,21 +750,21 @@ Accept: application/vnd.api+json
 }
 ```
 
-#### Updating a Resource's Attributes <a href="#crud-updating-resource-attributes" id="crud-updating-resource-attributes" class="headerlink"></a>
+#### Updating a Record's Attributes <a href="#crud-updating-record-attributes" id="crud-updating-record-attributes" class="headerlink"></a>
 
-Any or all of a resource's attributes **MAY** be included in the resource
-object included in a `PUT` request.
+Any or all of a record's attributes **MAY** be included in the record object
+included in a `PUT` request.
 
-If a request does not include all of the fields for a resource, the server
+If a request does not include all of the fields for a record, the server
 **MUST** interpret the missing fields as if they were included together with
 their current values. It **MUST NOT** interpret them as `null` values.
 
-> Note: Because the resources represented by JSON API have a list of known
+> Note: Because the records represented by JSON API have a list of known
 fields, the server *must* interpret the missing attributes in some way.
 Choosing to interpret them as `null` values would be just as arbitrary as
 choosing to interpret them as containing their current values, and the
-dominant real-world practice is to interpret such a request as a request for
-a partial update.
+dominant real-world practice is to interpret such a request as a request
+for a partial update.
 
 For example, the following `PUT` request is interpreted as a request to
 update only the `title` and `text` attributes of an article:
@@ -790,12 +784,12 @@ Accept: application/vnd.api+json
 }
 ```
 
-#### Updating a Resource's To-One Relationships <a href="#crud-updating-resource-to-one-relationships" id="crud-updating-resource-to-one-relationships" class="headerlink"></a>
+#### Updating a Record's To-One Relationships <a href="#crud-updating-record-to-one-relationships" id="crud-updating-record-to-one-relationships" class="headerlink"></a>
 
-If a to-one relationship is provided in the `links` section of a resource
-object in a `PUT` request, it **MUST** be one of:
+If a to-one relationship is provided in the `links` section of a record in a
+`PUT` request, it **MUST** be one of:
 
-* an object with `type` and `id` members corresponding to the related resource
+* an object with `type` and `id` members corresponding to the related record
 * `null`, to remove the relationship
 
 For instance, the following `PUT` request will update the `title` attribute
@@ -818,10 +812,10 @@ Accept: application/vnd.api+json
 }
 ```
 
-#### Updating a Resource's To-Many Relationships <a href="#crud-updating-resource-to-many-relationships" id="crud-updating-resource-to-many-relationships" class="headerlink"></a>
+#### Updating a Record's To-Many Relationships <a href="#crud-updating-record-to-many-relationships" id="crud-updating-record-to-many-relationships" class="headerlink"></a>
 
-If a to-many relationship is included in the `links` section of a resource
-object, it **MUST** be an object containing:
+If a to-many relationship is included in the *link object* of a record, it
+**MUST** be an object containing:
 
 * `type` and `id` members for homogeneous to-many relationships; to clear the
   relationship, set the `id` member to `[]`
@@ -867,25 +861,22 @@ successful and the client's current attributes remain up to date.
 
 ##### 200 OK <a href="#crud-updating-responses-200" id="crud-updating-responses-200" class="headerlink"></a>
 
-If a server accepts an update but also changes the resource(s) in other ways
+If a server accepts an update but also changes the resource in other ways
 than those specified by the request (for example, updating the `updated-at`
 attribute or a computed `sha`), it **MUST** return a `200 OK` response.
 
 The response document for a `200 OK` **MUST** include a representation of
-the updated resource(s) as if a `GET` request was made to the request URL.
+the updated resource as if a `GET` request was made to the request URL.
 
 ##### 403 Forbidden <a href="#crud-updating-relationship-responses-403" id="crud-updating-relationship-responses-403" class="headerlink"></a>
 
 A server **MUST** return `403 Forbidden` in response to an unsupported request
-to update a resource or relationship.
+to update a resource.
 
 ##### 404 Not Found <a href="#crud-updating-responses-404" id="crud-updating-responses-404" class="headerlink"></a>
 
 A server **MUST** return `404 Not Found` when processing a request to modify
 a resource that does not exist.
-
-A server **MUST** return `404 Not Found` when processing a request that
-references a related resource that does not exist.
 
 ##### 409 Conflict <a href="#crud-updating-responses-409" id="crud-updating-responses-409" class="headerlink"></a>
 
@@ -894,7 +885,8 @@ update a resource if that update would violate other server-enforced
 constraints (such as a uniqueness constraint on a field other than `id`).
 
 A server **MUST** return `409 Conflict` when processing a `PUT` request in
-which the resource's `type` and `id` do not match the server's endpoint.
+which the included record's `type` and `id` do not match the server's
+endpoint.
 
 ##### Other Responses <a href="#crud-updating-responses-other" id="crud-updating-responses-other" class="headerlink"></a>
 
@@ -904,16 +896,16 @@ details **MAY** also be returned, as discussed below.
 
 ### Updating Relationships <a href="#crud-updating-relationships" id="crud-updating-relationships" class="headerlink"></a>
 
-Although relationships can be modified along with resources (as described
+Although relationships can be modified inline using *link objects* (as described
 above), JSON API also supports updating of relationships independently at
 *relationship URLs*.
 
-If a *link object* contains a *relationship URL*, then the server **MUST**
-respond to requests to that URL to update the relationship.
+If a record's *link object* contains a *relationship URL*, then the server
+**MUST** respond to requests to that URL to update the relationship.
 
 > Note: Relationships are updated without exposing the underlying server
 semantics, such as foreign keys. Furthermore, relationships can be updated
-without necessarily affecting the related resources. For example, if an article
+without necessarily affecting the related records. For example, if an article
 has many authors, it is possible to remove one of the authors from the article
 without deleting the person itself. Similarly, if an article has many tags, it
 is possible to add or remove tags. Under the hood on the server, the first
@@ -973,7 +965,7 @@ that each contain `type` and `id` members.
 
 If a client makes a `PUT` request to a *to-many relationship URL*, the
 server **MUST** either completely replace every member of the relationship,
-return an appropriate error response if some resources can not be found or
+return an appropriate error response if some members can not be found or
 accessed, or return a `403 Forbidden` response if complete replacement is
 not allowed by the server.
 
@@ -998,8 +990,8 @@ relationship, the server **MUST NOT** add it again.
 has-many relationships. Document-based storage should check the has-many
 relationship before appending to avoid duplicates.
 
-If all of the specified resources can be added to, or are already present
-in, the relationship then the server **MUST** return a successful `204 No
+If all of the specified relations can be added to, or are already present
+in the relationship then the server **MUST** return a successful `204 No
 Content` response.
 
 > Note: This approach ensures that a request is successful if the server's
@@ -1021,9 +1013,9 @@ Accept: application/vnd.api+json
 
 If the client makes a `DELETE` request to a *relationship URL*, the server
 **MUST** delete the specified members from the relationship or return a `403
-Forbidden` response. If all of the specified resources are able to be
-removed from, or are already missing from, the relationship then the server
-**MUST** return a successful `204 No Content` response.
+Forbidden` response. If all of the specified members are able to be removed
+from, or are already missing from, the relationship then the server **MUST**
+return a successful `204 No Content` response.
 
 > Note: As described above for `POST` requests, this approach helps avoid
 pointless race conditions between multiple clients making the same changes.
@@ -1072,8 +1064,7 @@ details **MAY** also be returned, as discussed below.
 
 ### Deleting Resources <a href="#crud-deleting" id="crud-deleting" class="headerlink"></a>
 
-An individual resource can be *deleted* by making a `DELETE` request to the
-resource's URL:
+A resource can be *deleted* by making a `DELETE` request to the resource's URL:
 
 ```text
 DELETE /photos/1
@@ -1099,11 +1090,11 @@ details **MAY** also be returned, as discussed below.
 
 ## Errors <a href="#errors" id="errors" class="headerlink"></a>
 
-Error objects are specialized resource objects that **MAY** be returned in a
-response to provide additional information about problems encountered while
-performing an operation. Error objects **MUST** be returned as an array
-keyed by `"errors"` in the top level of a JSON API document, and **SHOULD
-NOT** be returned with any primary data.
+Error objects are specialized objects that **MAY** be returned in a response
+to provide additional information about problems encountered while performing
+an operation. Error objects **MUST** be returned as an array keyed by `"errors"`
+in the top level of a JSON API document, and **SHOULD NOT** be returned with
+any primary data.
 
 An error object **MAY** have the following members:
 
