@@ -30,11 +30,11 @@ interpreted as described in RFC 2119
 The base JSON API specification **MAY** be extended to support additional
 capabilities.
 
-An extension **MAY** make changes to and deviate from the requirements of the
-base specification apart from this section, which remains binding.
+An extension **MAY** make deviate from the requirements of the base
+specification apart from this section, which remains binding.
 
 Servers that support one or more extensions to JSON API **MUST** return
-those extensions in every response in the `supported-ext` media type
+those extensions in every response using the `supported-ext` media type
 parameter of the `Content-Type` header. The value of the `supported-ext`
 parameter **MUST** be a comma-separated (U+002C COMMA, ",") list of
 extension names.
@@ -82,7 +82,7 @@ contain any additional members.
 A JSON object **MUST** be at the root of every JSON API response containing
 data. This object defines a document's "top level".
 
-The document's "primary data" is a representation of the resource, collection
+A document's "primary data" is a representation of the resource, collection
 of resources, or resource relationship primarily targeted by a request.
 
 A document **MUST** contain either primary data or an array of [error objects](#errors).
@@ -134,7 +134,7 @@ In addition, a resource object **MAY** contain any of these top-level members:
 
 * `"links"`: a "links object", providing information about a resource's
   relationships (described below).
-* `"meta"`: non-standard meta-information about a resource that can not be
+* `"meta"`: non-standard meta-information about a resource that cannot be
   represented as an attribute or relationship.
 
 A resource object **MAY** contain additional top-level members. These members
@@ -383,9 +383,9 @@ multiple times.
 
 ### Meta information <a href="#document-structure-meta" id="document-structure-meta" class="headerlink"></a>
 
-As discussed above, the document **MAY** be extended to include
-meta-information as `"meta"` members in several locations: at the top-level,
-within resource objects, and within link objects.
+As discussed above, a document **MAY** be extended to include meta-information
+as `"meta"` members in several locations: at the top-level, within resource
+objects, and within link objects.
 
 All `"meta"` members **MUST** have an object as a value, the contents of which
 can be used for custom extensions.
@@ -430,7 +430,7 @@ if this header is missing or specifies an unsupported media type.
 
 > Note: Servers may support multiple media types at any endpoint. For example,
 a server may choose to support `text/html` in order to simplify viewing content
-via a web browser.
+in a web browser.
 
 Responses can be further refined with the optional features described below.
 
